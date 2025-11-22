@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+  <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+  <!--(Universal) Navigation Bar -->
+  <header>
+
+    <nav>
+
+      <div id="navbar-left">
+        <img src="img/logo.png" alt="logo">
+      </div>
+
+      <ul id ="navbar-links">
+        <li><a href="timetable.html"><img src="img/themes/default/timetable.svg" alt="to timetable"></a></li>
+        <li><a href="todo.html"><img src="img/themes/default/todo.svg" alt="to todo"></a></li>
+        <li><a href="about.html"><img src="img/themes/default/about.svg" alt="to about"></a></li>
+      </ul>
+
+      <div id="navbar-right">
+        <img class="icon" src="img/themes/default/burger.svg" onclick="showCosmetics()" alt="mode">
+        <div id="navbar-right-cosmetics">
+        <img class="icon" src="img/themes/default/darkmode.svg" onclick="toggleDarkMode()" alt="mode">
+        <img class="icon" src="img/themes/default/accent.svg" alt="accent">
+        <img class="icon" src="img/themes/default/theme.svg" alt="theme">
+        <img class="icon" src="img/themes/default/music.svg" alt="music">
+        </div>
+      </div>
+
+    </nav>
+
+  </header>
+
+
+
+
+  <!--(Universal) Section -->
+  <section id="homeSection">
+    
+    <!-- Welcome -->
+    <div class="Welcome">
+
+      <img src="img/themes/default/user.svg" alt="userIconDefualt">
+  
+      <h1 id="welcomeUser"> Welcome *User* </h1>
+
+      <h1 id="welcomeBackUser"> Welcome Back Alice!</h1>
+
+      <p id="welcomeMessage"></p>
+
+      <input type="text" id="welcomeUserNamer">
+    </div>
+
+
+
+    <!-- Music player -->
+    <div class="Muse">
+          <div id="museToolbar">
+              <img src="img/themes/default/playlist.svg" onclick="toggleLibrary()" alt="toggle playlist">
+              <img src="img/themes/default/edit.svg" onclick="toggleEditMode()" alt="edit playlist">
+            </div>
+
+          <div id="musePlayer">
+              <img src="img/themes/default/disc.svg">
+              <p id="museTitle">Not Playing</p>
+          <div id="museProgress">
+              <div id="museProgressBar"></div>
+          </div>
+          <p id="museTime">0:00 / 0:00</p>  
+            </div>
+
+          <div id="museControls">
+              <button id="shuffle">
+                  <img src="img/themes/default/shuffle.svg" alt="shuffle">
+                </button>
+              <button id="previous">
+                  <img src="img/themes/default/previous.svg" alt="previous">
+                </button>
+              <button id="play/pause">
+                  <img src="img/themes/default/play.svg" alt="play/pause">
+                </button>
+              <button id="next">
+                  <img src="img/themes/default/next.svg" alt="next">
+                </button>
+              <button id="repeat">
+                  <img src="img/themes/default/repeat.svg" alt="repeat">
+                </button>
+              <button id="upload">
+                  <img src="img/themes/default/upload.svg" alt="upload">
+                </button>
+            </div>
+
+          <div id="museLibrary">
+              <div id="museEditControls">
+                  <button onclick="selectAllSongs()"><img src="img/themes/default/play.svg" alt="SelectAll"></button>
+            
+                  <button onclick="deleteSelected()"><img src="img/themes/default/trash.svg" alt="DeleteSelection"></button>
+
+                  <button onclick="clearPlaylist()"><img src="img/themes/default/erase.svg" alt="Clear"></button>
+                </div>
+              <ul id="musePlaylist"></ul>
+            </div>
+      </div>
+
+  </section>
+
+
+
+
+  <!--(Universal) Footer -->
+  <footer>
+
+  </footer>
+
+  <!--(Universal) Java script link -->
+  <script src="js/index.js">
+
+  </script>
+</body>
+
+</html>
