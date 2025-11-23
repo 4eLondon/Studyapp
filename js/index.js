@@ -2,6 +2,7 @@
                     System wide 
  ***************************************************/
 
+
 // --------- Dark mode settings
 
 function toggleDarkMode() {
@@ -72,6 +73,58 @@ document.addEventListener('click', (e) => {
     picker.classList.remove('show');
   }
 });
+
+
+
+
+
+
+
+
+
+/***************************************************
+                Navigation 
+***************************************************/
+
+// Initialize navigation tooltips
+function initNavTooltips() {
+  const navItems = document.querySelectorAll('#navbar-links li');
+  
+  navItems.forEach(item => {
+    const link = item.querySelector('a');
+    const tooltip = item.querySelector('.nav-tooltip');
+    
+    if (link && tooltip) {
+      // Show tooltip on hover
+      link.addEventListener('mouseenter', function() {
+        if (window.innerWidth > 768) { // Only on desktop
+          tooltip.style.opacity = '1';
+          tooltip.style.transform = 'translateY(0)';
+        }
+      });
+      
+      // Hide tooltip when not hovering
+      link.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(10px)';
+      });
+      
+      // Hide tooltip on touch devices after tap
+      link.addEventListener('touchstart', function() {
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(10px)';
+      });
+    }
+  });
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initNavTooltips();
+});
+
+// Re-initialize when window is resized (in case of orientation change)
+window.addEventListener('resize', initNavTooltips);
 
 
 
@@ -400,10 +453,9 @@ function generateShuffleQueue() {
 function highlightCurrentSong() {
   const items = document.querySelectorAll('#musePlaylist li');
   items.forEach((item, i) => {
+    item.classList.remove('playing');
     if (i === currentMusicIndex) {
       item.classList.add('playing');
-    } else {
-      item.classList.remove('playing');
     }
   });
 }
@@ -463,7 +515,6 @@ function checkPlaylistEmpty() {
     shufflePosition = 0;
   }
 }
-
 function createPlaylistItem(name, index, id) {
   const li = document.createElement('li');
   li.innerHTML = `
@@ -482,42 +533,28 @@ function createPlaylistItem(name, index, id) {
       return;
     }
 
-    if (this.classList.contains('delete-ready')) {
-      const idx = parseInt(this.dataset.index);
-      const songId = parseInt(this.dataset.id);
-
-      await deleteSong(songId);
-      playlist.splice(idx, 1);
-      updateIndices();
-
-      if (idx < currentMusicIndex) {
-        currentMusicIndex--;
-      } else if (idx === currentMusicIndex) {
-        if (playlist.length === 0) {
-          document.getElementById('museTitle').textContent = 'Not Playing';
-          stopPlayback();
-        } else {
-          currentMusicIndex = Math.min(currentMusicIndex, playlist.length - 1);
-          loadAndPlay(currentMusicIndex);
-        }
-      }
-
-      this.remove();
-      checkPlaylistEmpty();
-
-      if (isShuffle) generateShuffleQueue();
-    } else {
-      document.querySelectorAll('#musePlaylist li').forEach(item => {
-        item.classList.remove('delete-ready');
-      });
-      this.classList.add('delete-ready');
-    }
+    // Single click selects the song
+    document.querySelectorAll('#musePlaylist li').forEach(item => {
+      item.classList.remove('delete-ready', 'playing');
+    });
+    this.classList.add('playing');
+    
+    // Update current music index when clicked
+    currentMusicIndex = parseInt(this.dataset.index);
+    highlightCurrentSong();
   });
 
   li.addEventListener('dblclick', function(e) {
     if (e.target.classList.contains('drag-handle')) return;
     if (editMode) return;
+    
+    // Double click plays the song
     loadAndPlay(parseInt(this.dataset.index));
+    
+    // Remove any delete-ready states
+    document.querySelectorAll('#musePlaylist li').forEach(item => {
+      item.classList.remove('delete-ready');
+    });
   });
 
   setupDragAndDrop(li);
@@ -540,6 +577,8 @@ async function init() {
       icon.src = 'img/themes/default/darkmode.svg';
     }
   }
+
+  
 
   // Only initialize music player if on home page
   if (document.getElementById('musePlayer')) {
@@ -791,7 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (todos.length === 0) {
       todoList.innerHTML = `
                 <div class="empty-state">
-                    <p>📝 List is empty! Add tasks using the buttons above.</p>
+                    <p>Add tasks to display them here</p>
                 </div>
             `;
       return;
@@ -807,9 +846,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="todo-text">${todo.text}</span>
                 <input type="text" class="edit-input" value="${todo.text}">
                 <div class="actions">
-                    <button class="btn edit-btn">✏️ Edit</button>
-                    <button class="btn save-btn">💾 Save</button>
-                    <button class="btn delete-btn">🗑️ Delete</button>
+                    <button class="btn edit-btn">Edit</button>
+                    <button class="btn save-btn">Save</button>
+                    <button class="btn delete-btn">Delete</button>
                 </div>
             `;
 
