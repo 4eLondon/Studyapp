@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="css/index.css">
+    </head>
+
+    <body>
+
+<!------------------------
+  (Universal) Navigation Bar
+------------------------->
+  <header>
+    <nav>
+   <!-- App logo (set to left)-->
+      <div id="navbar-left">
+        <img src="img/logo.png" alt="logo">
+      </div>
+
+        <!-- Navigation links to other pages (set in center )-->
+      <ul id="navbar-links">
+        <li><a href="todo.html"><img class="accent" src="img/themes/default/todo.svg" alt="to todo"></a></li>
+        <li><a href="index.html"><img class="accent" src="img/themes/default/home.svg" alt="to home"></a></li>
+        <li><a href="about.html"><img class="accent"  src="img/themes/default/about.svg" alt="to about"></a></li>
+      </ul>
+
+
+      <!-- Page cosmetics and themes (set to right)-->
+      <div id="navbar-right">
+        <img class="icon accent" src="img/themes/default/burger.svg" onclick="showCosmetics()" alt="mode">
+
+        <div id="navbar-right-cosmetics">
+           <!--Toggle Darkmode-->
+          <img class="icon accent" id="darkmode-icon" src="img/themes/default/darkmode.svg" onclick="toggleDarkMode()" alt="mode">
+
+          <!--Accent picker-->
+          <img class="icon accent" src="img/themes/default/accent.svg" onclick="toggleAccentPicker()" alt="accent">
+            <!--Accent picker dropdown-->
+          <div id="accent-picker">
+            <div class="accent-option active" color="black" onclick="setAccentColor('black')"></div>
+            <div class="accent-option" color="blue" onclick="setAccentColor('blue')"></div>
+            <div class="accent-option" color="red" onclick="setAccentColor('red')"></div>
+            <div class="accent-option" color="yellow" onclick="setAccentColor('yellow')"></div>
+            <div class="accent-option" color="green" onclick="setAccentColor('green')"></div>
+            <div class="accent-option" color="purple" onclick="setAccentColor('purple')"></div>
+            <div class="accent-option" color="pink" onclick="setAccentColor('pink')"></div>
+            <div class="accent-option" color="orange" onclick="setAccentColor('orange')"></div>
+          </div>
+
+          <!--change font and background-->
+          <img class="icon accent" src="img/themes/default/theme.svg" alt="theme">
+          <!--Stop music-->
+          <img class="icon accent" src="img/themes/default/music.svg" alt="music">
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+ 
+  <!-- x x x x x x [ Timetable content ] x x x x x x -->
+<section id="timetableSection">
+
+   <h1>Class Schedule</h1>
+                <div class="timetable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>8:00 AM - 9:00 AM</td>
+                                <td>Math</td>
+                                <td>English</td>
+                                <td>Science</td>
+                                <td>History</td>
+                                <td>Art</td>
+                            </tr>
+                            <tr>
+                                <td>9:00 AM - 10:00 AM</td>
+                                <td>English</td>
+                                <td>Math</td>
+                                <td>History</td>
+                                <td>Science</td>
+                                <td>PE</td>
+                            </tr>
+                            <tr>
+                                <td>10:00 AM - 11:00 AM</td>
+                                <td>Science</td>
+                                <td>History</td>
+                                <td>English</td>
+                                <td>Math</td>
+                                <td>Music</td>
+                            </tr>
+                            <tr>
+                                <td>11:00 AM - 12:00 PM</td>
+                                <td>History</td>
+                                <td>Science</td>
+                                <td>Math</td>
+                                <td>English</td>
+                                <td>Computer Science</td>
+                            </tr>
+                            <tr>
+                                <td>1:00 PM - 2:00 PM</td>
+                                <td>PE</td>
+                                <td>Art</td>
+                                <td>Music</td>
+                                <td>Computer Science</td>
+                                <td>Study Hall</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+</section>
+
+
+ <!------------------------
+  (Universal) Footer
+   ------------------------->
+ <footer>
+    <div class="container">
+      <p>&copy; 2023 Student Life Manager. All rights reserved.</p>
+    </div>
+  </footer>
+
+   <!------------------------
+  (Universal) Javascript link
+   ------------------------->
+  <script src="js/index.js"></script>
+
+    </body>    
+</html>

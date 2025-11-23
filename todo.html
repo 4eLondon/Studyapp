@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="css/index.css">
+    </head>
+
+    <body>
+
+
+<!------------------------
+(Universal) Navigation Bar
+------------------------->
+  <header>
+    <nav>
+   <!-- App logo (set to left)-->
+      <div id="navbar-left">
+        <img src="img/logo.png" alt="logo">
+      </div>
+
+        <!-- Navigation links to other pages (set in center )-->
+      <ul id="navbar-links">
+        <li><a href="timetable.html"><img class="accent" src="img/themes/default/timetable.svg" alt="to timetable"></a></li>
+        <li><a href="index.html"><img class="accent" src="img/themes/default/home.svg" alt="to home"></a></li>
+        <li><a href="about.html"><img class="accent"  src="img/themes/default/about.svg" alt="to about"></a></li>
+      </ul>
+
+
+      <!-- Page cosmetics and themes (set to right)-->
+      <div id="navbar-right">
+        <img class="icon accent" src="img/themes/default/burger.svg" onclick="showCosmetics()" alt="mode">
+
+        <div id="navbar-right-cosmetics">
+           <!--Toggle Darkmode-->
+          <img class="icon accent" id="darkmode-icon" src="img/themes/default/darkmode.svg" onclick="toggleDarkMode()" alt="mode">
+
+          <!--Accent picker-->
+          <img class="icon accent" src="img/themes/default/accent.svg" onclick="toggleAccentPicker()" alt="accent">
+            <!--Accent picker dropdown-->
+          <div id="accent-picker">
+            <div class="accent-option active" color="black" onclick="setAccentColor('black')"></div>
+            <div class="accent-option" color="blue" onclick="setAccentColor('blue')"></div>
+            <div class="accent-option" color="red" onclick="setAccentColor('red')"></div>
+            <div class="accent-option" color="yellow" onclick="setAccentColor('yellow')"></div>
+            <div class="accent-option" color="green" onclick="setAccentColor('green')"></div>
+            <div class="accent-option" color="purple" onclick="setAccentColor('purple')"></div>
+            <div class="accent-option" color="pink" onclick="setAccentColor('pink')"></div>
+            <div class="accent-option" color="orange" onclick="setAccentColor('orange')"></div>
+          </div>
+
+          <!--change font and background-->
+          <img class="icon accent" src="img/themes/default/theme.svg" alt="theme">
+          <!--Stop music-->
+          <img class="icon accent" src="img/themes/default/music.svg" alt="music">
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- x x x x x x [ To do content ] x x x x x x -->
+  <section id="todoSection">
+   
+    <div id="todoList">
+        <div class="todoTitle"><h1>Todo List</h1></div>
+        
+        <div class="createItems">
+            <input type="text" id="newItem" placeholder="Add a new task...">
+            <button id="addItems">Add Task</button>
+        </div>
+        
+        <ul class="listItems" id="listItems"></ul>
+    </div>
+</section>
+
+
+
+
+ <!------------------------
+  (Universal) Footer
+   ------------------------->
+ <footer>
+    <div class="container">
+      <p>&copy; 2023 Student Life Manager. All rights reserved.</p>
+    </div>
+  </footer>
+
+   <!------------------------
+  (Universal) Javascript link
+   ------------------------->
+  <script src="js/index.js"></script>
+
+
+    </body>    
+</html>
