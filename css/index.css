@@ -196,10 +196,52 @@ body.dark {
     }
     #navbar-right-cosmetics.show { display: flex; }
 
+#navbar-links li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* show nav icon name */
+.nav-tooltip {
+  position: absolute;
+  bottom: -30px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+#navbar-links li:hover .nav-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* mobile nav icon name */
+.nav-label {
+  display: none;
+  font-size: 0.7rem;
+  margin-top: 4px;
+  color: inherit;
+}
+
     /* Darkmode*/
     body.dark #navbar-right-cosmetics { background: #3a3a3a; }
     body.dark nav img { filter: brightness(0) invert(1); }
     body.dark nav { background-color: #2a2a2a; }
+    body.dark .nav-tooltip {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+}
 
 
 /* - - - - - - - - [ Footer ] - - - - - - - - - - */
@@ -214,6 +256,7 @@ footer {
   width: 100%;
   opacity: 80%;
    pointer-events: none;
+   box-sizing: border-box;
 }
 
 /* Dark mode*/
@@ -278,6 +321,7 @@ body.dark footer { background-color: #2a2a2a;
   overflow-y: auto;
   height: auto;
   transition: grid-template-columns 0.4s ease-in-out;
+    box-sizing: border-box;
 }
 
 .Muse.expanded {
@@ -396,6 +440,8 @@ body.dark #museLibrary {
   opacity: 1;
   max-height: 40rem; 
   height: 100%;
+    width: 90%;
+  box-sizing: border-box;
 }
 
 
@@ -525,6 +571,11 @@ body.dark #museToolbar img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #museLibrary li.playing {
@@ -608,7 +659,7 @@ body.dark #museControls {
 }
 
 
-
+  
 
 /***********************************
           Todo page
@@ -931,7 +982,7 @@ body.dark .profiles img {
 
   #navbar-links {
     flex-direction: row;
-    gap: 15px;
+    gap: 20px;
   }
 
   #navbar-right {
@@ -950,6 +1001,23 @@ body.dark .profiles img {
     width: 2rem;
   }
 
+   .nav-tooltip {
+    display: none; 
+  }
+  
+  .nav-label {
+    display: block; 
+  }
+  
+
+  footer {
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    position: fixed;
+    width: 100vw; 
+  }
+
+
 
 
   /* Home page */
@@ -965,6 +1033,8 @@ body.dark .profiles img {
   .Muse {
     border-radius: 30px;
     width: 100%;
+      grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .Muse.expanded {
@@ -974,7 +1044,7 @@ body.dark .profiles img {
   #musePlayer {
     margin: 1rem;
     padding: 1.5rem;
-    border-radius: 30px;
+    border-radius:30px;
   }
 
   #musePlayer img {
@@ -1009,12 +1079,17 @@ body.dark .profiles img {
     padding: 1rem;
     border-radius: 30px;
     max-height: 300px;
+       position: relative;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   #museLibrary li {
     padding: 0.75rem;
     border-radius: 30px;
     font-size: 0.9rem;
+    white-space: normal;
+    word-wrap: break-word;
   }
 
   #museToolbar {
@@ -1108,9 +1183,8 @@ body.dark .profiles img {
 }
 
 .timetable table {
-    min-width: 600px; /* Ensures table doesn't get too squished */
+    min-width: 600px;
 }
-
 
 
 
@@ -1130,7 +1204,7 @@ body.dark .profiles img {
   }
 
   #navbar-links {
-    gap: 10px;
+    gap: 15px;
   }
 
   #navbar-right {
@@ -1139,6 +1213,19 @@ body.dark .profiles img {
 
   #navbar-right-cosmetics {
     gap: 10px;
+  }
+   .nav-label {
+    font-size: 0.6rem;
+  }
+
+
+
+   footer {
+   padding: 0.6rem;
+    font-size: 0.75rem;
+    position: relative;
+    position: fixed; 
+    width: 100vw; 
   }
 
   /* Home page */
@@ -1154,6 +1241,12 @@ body.dark .profiles img {
   .Muse {
     border-radius: 20px;
     border-width: 2px;
+      grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+    .Muse.expanded {
+    grid-template-columns: 1fr;
   }
 
   #musePlayer {
@@ -1192,12 +1285,17 @@ body.dark .profiles img {
     border-radius: 20px;
     border-width: 2px;
     max-height: 250px;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  #museLibrary li {
+   #museLibrary li {
     padding: 0.6rem;
     border-radius: 20px;
     font-size: 0.8rem;
+    white-space: normal;
+    word-wrap: break-word;
   }
 
   #museEditControls button {
