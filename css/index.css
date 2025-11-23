@@ -1,10 +1,32 @@
-/* ================================
-   IMPORTS & ANIMATION
-   ================================ */
+/***********************************
+Imports and site wide configurations
+***********************************/
 
+
+/* - - - - - - - - [ Fonts ] - - - - - - - - - - */
 @font-face {
-  font-family: 'Montserrat';
-  src: url('../img/themes/default/Montserrat.ttf');
+  font-family: 'default';
+  src: url('../img/fonts/Montserrat.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'pixel';
+  src: url('../img/fonts/Minecraft.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'typewriter';
+  src: url('../img/fonts/Typewriter.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'handwrite';
+  src: url('../img/fonts/Cuter.ttf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 @keyframes spin {
@@ -16,10 +38,14 @@
   }
 }
 
+ @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-/* ================================
-   PRESET STYLES
-   ================================ */
+
+
+/* - - - - - - - - [ HTML element configuration ] - - - - - - - - - - */
 
 * {
   padding: 0;
@@ -44,12 +70,8 @@ button:active {
   transform: translateY(2px);
 }
 
-/* ================================
-   BODY & DARK MODE
-   ================================ */
-
 body {
-  font-family: 'Montserrat', Cambria, serif, sans-serif;
+  font-family: 'default', Cambria, serif, sans-serif;
   background-color: white;
   color: black;
   transition: background-color 0.3s, color 0.3s;
@@ -61,126 +83,164 @@ body.dark {
 }
 
 
-/* ================================
-   NAVIGATION
-   ================================ */
 
-nav {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  width: 100vw;
-  height: 5rem;
+
+/* - - - - - - - - [ Accent colors ] - - - - - - - - - - */
+
+    :root {
+      --accent-light: #1a1a1a;
+      --accent-neon: #ffffff;
+    }
+
+    .accent {
+       color: var(--accent-light);
+      }
+
+    body.dark .accent {
+       color: var(--accent-neon); 
+      }
+
+    /* Image filters - Light mode (darker) */
+    img.accent { filter: brightness(0); }
+    body[accent="blue"] img.accent { filter: invert(20%) sepia(90%) saturate(2000%) hue-rotate(210deg); }
+    body[accent="red"] img.accent { filter: invert(15%) sepia(90%) saturate(4000%) hue-rotate(355deg); }
+    body[accent="yellow"] img.accent { filter: invert(75%) sepia(85%) saturate(600%) hue-rotate(10deg); }
+    body[accent="green"] img.accent { filter: invert(25%) sepia(90%) saturate(2000%) hue-rotate(100deg); }
+    body[accent="purple"] img.accent { filter: invert(20%) sepia(90%) saturate(2000%) hue-rotate(260deg); }
+    body[accent="pink"] img.accent { filter: invert(30%) sepia(90%) saturate(2000%) hue-rotate(300deg); }
+    body[accent="orange"] img.accent { filter: invert(35%) sepia(90%) saturate(2000%) hue-rotate(10deg); }
+
+    /* Image filters - Dark mode (neon) */
+    body.dark img.accent { filter: brightness(0) invert(1); }
+    body.dark[accent="blue"] img.accent { filter: invert(70%) sepia(90%) saturate(1500%) hue-rotate(190deg) brightness(110%); }
+    body.dark[accent="red"] img.accent { filter: invert(50%) sepia(100%) saturate(3000%) hue-rotate(340deg) brightness(110%); }
+    body.dark[accent="yellow"] img.accent { filter: invert(90%) sepia(80%) saturate(800%) hue-rotate(5deg) brightness(110%); }
+    body.dark[accent="green"] img.accent { filter: invert(70%) sepia(90%) saturate(1500%) hue-rotate(90deg) brightness(110%); }
+    body.dark[accent="purple"] img.accent { filter: invert(60%) sepia(100%) saturate(2000%) hue-rotate(250deg) brightness(110%); }
+    body.dark[accent="pink"] img.accent { filter: invert(70%) sepia(100%) saturate(2000%) hue-rotate(290deg) brightness(110%); }
+    body.dark[accent="orange"] img.accent { filter: invert(70%) sepia(100%) saturate(2000%) hue-rotate(360deg) brightness(110%); }
+
+    /* ===== ACCENT PICKER ===== */
+    #accent-picker {
+      display: none;
+      position: absolute;
+      top: 100%;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+      width: 150px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+    }
+    #accent-picker.show { display: flex; }
+    body.dark #accent-picker { background: #444; }
+
+    .accent-option {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .accent-option:hover { transform: scale(1.15); }
+    .accent-option.active { border-color: #333; }
+    body.dark .accent-option.active { border-color: white; }
+
+    .accent-option[color="black"] { background: linear-gradient(135deg, #1a1a1a 50%, #e0e0e0 50%); }
+    .accent-option[color="blue"] { background: #3b82f6; }
+    .accent-option[color="red"] { background: #ef4444; }
+    .accent-option[color="yellow"] { background: #eab308; }
+    .accent-option[color="green"] { background: #22c55e; }
+    .accent-option[color="purple"] { background: #8b5cf6; }
+    .accent-option[color="pink"] { background: #ec4899; }
+    .accent-option[color="orange"] { background: #f97316; }
+
+
+
+/* - - - - - - - - [ Navigation bar ] - - - - - - - - - - */
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100vw;
+      height: 5rem;
+      background-color: lightgray;
+      transition: background-color 0.3s;
+    }
+    
+    nav img {
+      width: 3rem;
+      height: auto;
+      filter: brightness(0);
+      cursor: pointer;
+    }
+    nav img:hover { transform: scale(1.2); }
+
+    #navbar-left img { filter: none !important; }
+
+    #navbar-links { display: flex; gap: 30px; }
+
+    #navbar-right { display: flex; gap: 30px; position: relative; }
+
+    #navbar-right-cosmetics {
+      display: none;
+      align-items: center;
+      gap: 30px;
+      background: white;
+      border-radius: 50px;
+      padding: 5px 15px;
+      position: relative;
+    }
+    #navbar-right-cosmetics.show { display: flex; }
+
+    /* Darkmode*/
+    body.dark #navbar-right-cosmetics { background: #3a3a3a; }
+    body.dark nav img { filter: brightness(0) invert(1); }
+    body.dark nav { background-color: #2a2a2a; }
+
+
+/* - - - - - - - - [ Footer ] - - - - - - - - - - */
+footer {
   background-color: lightgray;
-  color: #1a1a1a;
-  transition: background-color 0.3s, color 0.3s;
+  color: #333;
+  text-align: center;
+  padding: 1rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  opacity: 80%;
+   pointer-events: none;
 }
 
-body.dark nav {
-  background-color: #2a2a2a;
-  color: white;
-}
-
-nav ul li {
-  text-decoration: none;
-}
-
-nav img {
-  width: 3rem;
-  height: auto;
-  filter: brightness(0);
-  transition: scale 0.2s, opacity 0.2s, filter 0.3s;
-}
-
-nav #navbar-left img {
-  filter: none;
-}
-
-body.dark nav img {
-  filter: brightness(0) invert(1);
-}
-
-body.dark nav #navbar-left img {
-  filter: none;
-}
-
-nav img:hover {
-  scale: 120%;
-}
-
-nav img:active {
-  opacity: 0.2;
-}
-
-/* Navbar Sections */
-#navbar-left {}
-
-#navbar-links {
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
-}
-
-#navbar-right {
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
-}
-
-#navbar-right-cosmetics {
-  display: none;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  gap: 30px;
-  background-color: white;
-  border-radius: 50px;
-  width: 20rem;
-  height: auto;
-  padding: 5px;
-  transition: background-color 0.3s;
-}
-
-#navbar-right-cosmetics.show {
-  display: flex;
-}
-
-body.dark #navbar-right-cosmetics {
-  background-color: #3a3a3a;
-}
-
-#navbar-right-cosmetics img {
-  filter: brightness(0);
-}
-
-body.dark #navbar-right-cosmetics img {
-  filter: brightness(0) invert(1);
-}
+/* Dark mode*/
+body.dark footer { background-color: #2a2a2a;
+  color:white; }
 
 
-/* ================================
-   INDEX/HOME PAGE
-   ================================ */
-
+/***********************************
+          Home page
+***********************************/
 #homeSection {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    gap:2rem;
-    margin:2rem;
+    gap: 2rem;
+    margin: 2rem;
 }
 
-
-
-/* Welcome Section */
+/* - - - - - - - - [ Welcome text ] - - - - - - - - - - */
 .Welcome {
   display: block;
+  text-align: center;
 }
 
-.Welcome img{
-  width:20rem;
+.Welcome img {
+  width: 20rem;
   height: auto;
 }
 
@@ -192,7 +252,6 @@ body.dark #navbar-right-cosmetics img {
   display: block;
 }
 
-
 #welcomeMessage {
   color: blueviolet;
 }
@@ -202,9 +261,10 @@ body.dark #navbar-right-cosmetics img {
 }
 
 
+/* - - - - - - - - [ Music player ] - - - - - - - - - - */
 
 
-/* Music Player */
+/* Default configuration */
 .Muse {
   position: relative;
   display: grid;
@@ -214,13 +274,22 @@ body.dark #navbar-right-cosmetics img {
   border: solid #1a1a1a 3px;
   border-radius: 50px;
   width: fit-content;
-  transition: grid-template-columns 40s ease-in-out;
+  max-width: 100%;
+  overflow-y: auto;
+  height: auto;
+  transition: grid-template-columns 0.4s ease-in-out;
 }
 
 .Muse.expanded {
   grid-template-columns: 1fr 1fr;
 }
 
+body.dark .Muse {
+  border-color: white;
+}
+
+
+/* Now playing/Disk section */
 #musePlayer {
     grid-column: span 2 / span 2;
     grid-row: span 2 / span 2;
@@ -235,51 +304,11 @@ body.dark #navbar-right-cosmetics img {
     text-align: center;
 }
 
-
-#museTitle {
-    margin-top: 1rem;
-       padding: 1rem;
-      color: white;
-      background-color: gray;
-      border: 3px;
-      border-radius: 50px;
-      max-width: 15rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+body.dark #musePlayer {
+  border-color: #666;
 }
 
-#museProgress {
-    width: 80%;
-      height: 6px;
-      background-color: lightgray;
-      border-radius: 3px;
-      margin-top: 1rem;
-      cursor: pointer;
-}
-
-#museProgressBar {
-    width: 0%;
-      height: 100%;
-      background-color: #3a3a3a;
-      border-radius: 3px;
-      transition: width 0.1s linear;
-}
-
-body.dark #museProgress {
-    background-color: #555;
-}
-
-body.dark #museProgressBar {
-    background-color: white;
-}
-
-#museTime {
-    font-size: 0.8rem;
-      margin-top: 0.5rem;
-      opacity: 0.7;
-}
- #musePlayer img {
+#musePlayer img {
   width: 20rem;
   height: auto;
   animation: spin 4s linear infinite;
@@ -290,75 +319,89 @@ body.dark #museProgressBar {
   animation-play-state: running;
 }
 
+#museTitle {
+    margin-top: 1rem;
+    padding: 1rem;
+    color: white;
+    background-color: gray;
+    border: 3px;
+    border-radius: 50px;
+    max-width: 15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Progress bar and song duration */
+#museProgress {
+    width: 80%;
+    height: 6px;
+    background-color: lightgray;
+    border-radius: 3px;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+#museProgressBar {
+    width: 0%;
+    height: 100%;
+    background-color: #3a3a3a;
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+#museTime {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+
+/* Dark mode for muse player*/
+body.dark #museProgress {
+    background-color: #555;
+}
+
+body.dark #museProgressBar {
+    background-color: white;
+}
+
+
+
+/* Playlist section (hidden by default until file is uploaded) */
 #museLibrary {
   grid-column: span 2 / span 2;
   grid-row: span 3 / span 3;
-  grid-column-start: 3;   
+  grid-column-start: 3;
   margin: 2rem;
   border: 3px #3a3a3a solid;
   border-radius: 50px;
   padding: 2rem;
   display: none;
   opacity: 0;
-  transition: opacity 2s ease;
+  transition: opacity 0.5s ease;
   max-height: 400px;
   overflow-y: auto;
 }
 
-#museLibrary::-webkit-scrollbar {
-    width: 8px;
+body.dark #museLibrary {
+  border-color: #666;
 }
 
-#museLibrary::-webkit-scrollbar-track {
-    background: lightgray;
-      border-radius: 10px;
-}
 
-#museLibrary::-webkit-scrollbar-thumb {
-    background: #3a3a3a;
-      border-radius: 10px;
-}
-
-body.dark #museLibrary::-webkit-scrollbar-track {
-    background: #2a2a2a;
-}
-
-body.dark #museLibrary::-webkit-scrollbar-thumb {
-    background: #666;
-}
-  
+/* Connects to js to show play list*/ 
 #museLibrary.show {
   display: block;
-    opacity: 1;
-
+  opacity: 1;
+  max-height: 40rem; 
+  height: 100%;
 }
 
 
 
-#museControls {
-    grid-column: span 2 / span 2;
-    grid-row-start: 3;
-    margin:2rem;
-    border: 3px #3a3a3a solid;
-    border-radius: 50px;
-    padding:2rem;
-     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap:1.5rem;
-    align-items: center;
-    text-align: center;
 
-}
-
-#museControls img{
-  width:4rem;
-  height: auto;
-}
-
-
-
-/* Toolbar */
+/* Playlist toolbar */
 #museToolbar {
   position: absolute;
   top: 1rem;
@@ -381,11 +424,15 @@ body.dark #museLibrary::-webkit-scrollbar-thumb {
   transform: scale(1.1);
 }
 
+/* Dark mode */
 body.dark #museToolbar img {
   filter: brightness(0) invert(1);
 }
 
-/* Edit controls */
+
+
+
+/* Playlist edit controls */
 #museEditControls {
   display: none;
   gap: 0.5rem;
@@ -399,14 +446,14 @@ body.dark #museToolbar img {
 
 #museEditControls button {
   padding: 0.5rem 1rem;
-  background-color: none;
+  background-color: transparent;
   color: white;
   border-radius: 20px;
   font-family: inherit;
   font-size: 0.8rem;
 }
 
-#museEditControls img{
+#museEditControls img {
   width: 2rem;
   height: auto;
 }
@@ -415,50 +462,13 @@ body.dark #museToolbar img {
   background-color: #555;
 }
 
-/* Playlist items */
-#museLibrary li {
-  background-color: lightgray;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#museLibrary li.playing {
-  background-color: white;
-  border: 2px solid #3a3a3a;
-}
-
-body.dark #museLibrary li {
-  background-color: #3a3a3a;
-}
-
-body.dark #museLibrary li.playing {
-  background-color: #1a1a1a;
-  border: 2px solid white;
-}
-
-#museLibrary li.delete-ready {
-  background-color: #e74c3c;
-  color: white;
-}
-
-#museLibrary li.selected {
-  background-color: #3498db;
-  color: white;
-}
-
 /* Drag handle for reordering */
 #museLibrary li .drag-handle {
   cursor: grab;
   padding: 0 0.5rem;
   opacity: 0;
   transition: opacity 0.2s;
-} 
+}
 
 #museLibrary li:hover .drag-handle {
   opacity: 0.6;
@@ -504,6 +514,393 @@ body.dark #museLibrary li.playing {
 
 
 
+/* The actual playlist items */
+#museLibrary li {
+  background-color: lightgray;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#museLibrary li.playing {
+  background-color: white;
+  border: 2px solid #3a3a3a;
+}
+
+#museLibrary li.delete-ready {
+  background-color: #e74c3c;
+  color: white;
+}
+
+#museLibrary li.selected {
+  background-color: #3498db;
+  color: white;
+}
+
+
+/* Dark mode */
+body.dark #museLibrary li {
+  background-color: #3a3a3a;
+}
+
+body.dark #museLibrary li.playing {
+  background-color: #1a1a1a;
+  border: 2px solid white;
+}
+
+
+
+
+/* Playlist scrollbar*/
+#museLibrary::-webkit-scrollbar {
+    width: 8px;
+}
+
+#museLibrary::-webkit-scrollbar-track {
+    background: lightgray;
+    border-radius: 10px;
+}
+
+#museLibrary::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 10px;
+}
+
+body.dark #museLibrary::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+body.dark #museLibrary::-webkit-scrollbar-thumb {
+    background: #666;
+}
+
+
+
+
+/* Music controls */
+#museControls {
+    grid-column: span 2 / span 2;
+    grid-row-start: 3;
+    margin: 2rem;
+    border: 3px #3a3a3a solid;
+    border-radius: 50px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
+    align-items: center;
+    text-align: center;
+}
+
+body.dark #museControls {
+  border-color: #666;
+}
+
+#museControls img {
+  width: 4rem;
+  height: auto;
+}
+
+
+
+
+/***********************************
+          Todo page
+***********************************/
+#todoSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 2rem;
+    margin: 10rem;
+}
+
+#todoList {
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    border: solid 5px;
+    border-color: var(--accent-light);
+}
+
+body.dark #todoList {
+  border-color: var(--accent-neon);
+  background-color: #2a2a2a;
+}
+
+.todoTitle {
+    background-color: var(--accent-light); 
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+body.dark .todoTitle {
+  background-color: var(--accent-neon);
+  color: black;
+}
+
+.todoTitle h1 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.createItems {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#newItem {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#newItem:focus {
+    border-color: var(--accent-light);
+}
+
+body.dark #newItem {
+  background-color: #3a3a3a;
+  color: white;
+  border-color: #555;
+}
+
+#addItems {
+    background-color: var(--accent-light); 
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#addItems:hover {
+    opacity: 0.8;
+}
+
+body.dark #addItems {
+  background-color: var(--accent-neon);
+  color: black;
+}
+
+.listItems {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.listItem {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    animation: fadeIn 0.3s;
+}
+
+.listItem:last-child {
+    border-bottom: none;
+}
+
+body.dark .listItem {
+  border-bottom-color: #444;
+}
+
+.todo-text {
+    flex: 1;
+    margin: 0 15px;
+    font-size: 16px;
+    word-break: break-word;
+}
+
+.todo-text.editing {
+    display: none;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid var(--accent-light);
+    border-radius: 6px;
+    font-size: 16px;
+    display: none;
+}
+
+body.dark .edit-input {
+  background-color: #3a3a3a;
+  color: white;
+  border-color: var(--accent-neon);
+}
+
+.edit-input.active {
+    display: block;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background: #4cc9f0;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #3ab0d7;
+}
+
+.save-btn {
+    background: #4ade80;
+    color: white;
+    display: none;
+}
+
+.save-btn.active {
+    display: inline-block;
+}
+
+.delete-btn {
+    background: #f72585;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #d91b6a;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+}
+
+body.dark .empty-state {
+  color: #999;
+}
+
+
+      
+
+/***********************************
+          Timetable page
+***********************************/
+
+#timetableSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 2rem;
+    margin: 2rem;
+    padding: 2rem;
+}
+
+.timetable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+}
+
+.timetable th,
+.timetable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.timetable th {
+  background-color: #f2f2f2;
+}
+
+
+/***********************************
+          About page
+***********************************/
+
+.aboutSection {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.profiles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+#teamTitle {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.1em;
+    transition: opacity 0.5s ease;
+}
+
+.profiles img {
+    width: 12rem;
+    height: 12rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent-light);
+}
+
+body.dark .profiles img {
+  border-color: var(--accent-neon);
+}
+
+.aboutArrow {
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    opacity: 0.7;
+}
+
+.aboutArrow:hover {
+    transform: scale(1.2);
+    opacity: 1;
+}
+
+#aboutName {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+#aboutInfo {
+    margin-top: 0.5rem;
+    font-size: 14px;
+    opacity: 0.8;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 
 
@@ -512,21 +909,385 @@ body.dark #museLibrary li.playing {
 
 
 
-/* ================================
-   TIMETABLE PAGE
-   ================================ */
 
 
-/* ================================
-   ABOUT PAGE
-   ================================ */
+/***********************************
+     Mobile adaption settings
+***********************************/
 
 
-/* ================================
-   TODO PAGE
-   ================================ */
+/* - - - - - - - - [ Tablets ] - - - - - - - - - - */
+@media (max-width: 768px) {
+
+  /* Navigation bar */
+  nav {
+    padding: 0 1rem;
+    position: relative;
+  }
+
+  nav img {
+    width: 2.5rem;
+  }
+
+  #navbar-links {
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  #navbar-right {
+    gap: 15px;
+  }
+
+  #navbar-right-cosmetics {
+        position: absolute;
+        top: 100%;
+        right: 1rem;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+  #navbar-right-cosmetics img {
+    width: 2rem;
+  }
 
 
-/* ================================
-   MOBILE ADAPTATION
-   ================================ */
+
+  /* Home page */
+  #homeSection {
+    margin: 1rem;
+    gap: 1.5rem;
+  }
+
+  .Welcome img {
+    width: 14rem;
+  }
+
+  .Muse {
+    border-radius: 30px;
+    width: 100%;
+  }
+
+  .Muse.expanded {
+    grid-template-columns: 1fr;
+  }
+
+  #musePlayer {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 30px;
+  }
+
+  #musePlayer img {
+    width: 12rem;
+  }
+
+  #museTitle {
+    max-width: 10rem;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  #museProgress {
+    width: 90%;
+  }
+
+  #museControls {
+    margin: 1rem;
+    padding: 1rem;
+    border-radius: 30px;
+    gap: 1rem;
+  }
+
+  #museControls img {
+    width: 2.5rem;
+  }
+
+  #museLibrary {
+    grid-column: 1 / -1;
+    grid-column-start: auto;
+    margin: 1rem;
+    padding: 1rem;
+    border-radius: 30px;
+    max-height: 300px;
+  }
+
+  #museLibrary li {
+    padding: 0.75rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+  }
+
+  #museToolbar {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  #museToolbar img {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  #museEditControls img {
+    width: 1.5rem;
+  }
+
+  /* Todo page */
+  #todoSection {
+    margin: 5rem 1rem;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  /* Timetable page */
+  #timetableSection {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .weekView {
+    grid-template-columns: 60px repeat(7, 1fr);
+    font-size: 0.8rem;
+  }
+
+
+
+
+
+
+
+
+
+
+  /* About page */
+  .aboutSection {
+    padding: 2rem 1rem;
+  }
+
+  .profiles {
+    gap: 1rem;
+  }
+    
+  .profiles img {
+    width: 8rem;
+    height: 8rem;
+  }
+
+  #teamTitle {
+    font-size: 2rem;
+  }
+
+  .aboutArrow {
+    width: 30px;
+    height: 30px;
+  }
+    
+  #aboutName {
+    font-size: 20px;
+  }
+    
+  #aboutInfo {
+    font-size: 12px;
+    max-width: 250px;
+    padding: 0 1rem;
+  }
+}
+
+
+.timetable {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.timetable table {
+    min-width: 600px; /* Ensures table doesn't get too squished */
+}
+
+
+
+
+
+
+
+/* - - - - - - - - [ Phones ] - - - - - - - - - - */
+@media (max-width: 480px) {
+
+  /* Navigation bar*/
+  nav {
+    height: 4rem;
+  }
+
+  nav img {
+    width: 2rem;
+  }
+
+  #navbar-links {
+    gap: 10px;
+  }
+
+  #navbar-right {
+    gap: 10px;
+  }
+
+  #navbar-right-cosmetics {
+    gap: 10px;
+  }
+
+  /* Home page */
+  #homeSection {
+    margin: 0.5rem;
+    gap: 1rem;
+  }
+
+  .Welcome img {
+    width: 10rem;
+  }
+
+  .Muse {
+    border-radius: 20px;
+    border-width: 2px;
+  }
+
+  #musePlayer {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 20px;
+    border-width: 2px;
+  }
+
+  #musePlayer img {
+    width: 8rem;
+  }
+
+  #museTitle {
+    max-width: 8rem;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  #museControls {
+    margin: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 20px;
+    border-width: 2px;
+    gap: 0.75rem;
+  }
+
+    #museControls img {
+        width: 2.5rem; 
+        padding: 0.5rem; 
+    }
+
+  #museLibrary {
+    margin: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 20px;
+    border-width: 2px;
+    max-height: 250px;
+  }
+
+  #museLibrary li {
+    padding: 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+
+  #museEditControls button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+  }
+
+ #museToolbar img {
+        width: 1.8rem;
+        height: 1.8rem;
+        padding: 0.3rem;
+    }
+
+
+
+
+
+
+
+
+
+  /* Todo page */
+  #todoSection {
+    margin: 3rem 0.5rem;
+  }
+
+  .createItems {
+    flex-direction: column;
+  }
+
+  #addItems {
+    padding: 14px;
+  }
+
+      .listItem {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 10px 14px;
+        font-size: 16px; 
+    }
+
+
+
+
+
+
+
+
+  /* Timetable page */
+  #timetableSection {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .calendarTitle h1 {
+    font-size: 1.2rem;
+  }
+
+  .calendarButtons button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  /* About page */
+  .aboutSection {
+    padding: 2rem 0.5rem;
+  }
+
+  .profiles img {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  #teamTitle {
+    font-size: 1.5rem;
+  }
+    
+  .aboutArrow {
+    width: 24px;
+    height: 24px;
+  }
+
+  #aboutName {
+    font-size: 18px;
+  }
+
+  #aboutInfo {
+    font-size: 11px;
+    max-width: 200px;
+  }
+}
