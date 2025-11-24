@@ -133,11 +133,11 @@ window.addEventListener('resize', initNavTooltips);
 
 
 let db;
-const dbName = 'musePlayerDB';
+const dbName = 'Study DataBase';
 
 function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, 1);
+    const request = indexedDB.open(dbName, 3); // Increment to version 3
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
@@ -162,6 +162,11 @@ function initDB() {
       }
       if (!db.objectStoreNames.contains('settings')) {
         db.createObjectStore('settings', { keyPath: 'key' });
+      }
+      if (!db.objectStoreNames.contains('todos')) {
+        const todoStore = db.createObjectStore('todos', { keyPath: 'id', autoIncrement: true });
+        // Create index for dueDate to query todos by date
+        todoStore.createIndex('dueDate', 'dueDate', { unique: false });
       }
     };
   });
@@ -233,6 +238,204 @@ function getSetting(key) {
 /***************************************************
                    Home PAGE
  ***************************************************/
+
+// Notes functionality
+if (document.getElementById('notesArea')) {
+  const notesArea = document.getElementById('notesArea');
+  
+  // Load notes from IndexedDB on page load
+  initDB().then(async () => {
+    const savedNotes = await getSetting('notes');
+    if (savedNotes) {
+      notesArea.value = savedNotes;
+    }
+  });
+  
+  // Auto-save notes every 2 seconds
+  let notesTimeout;
+  notesArea.addEventListener('input', function() {
+    clearTimeout(notesTimeout);
+    notesTimeout = setTimeout(() => {
+      saveSetting('notes', notesArea.value);
+    }, 2000);
+  });
+}
+
+function saveNotes() {
+  const notesArea = document.getElementById('notesArea');
+  const text = notesArea.value;
+  
+  // Create blob and download
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `notes_${new Date().toISOString().split('T')[0]}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function loadNotes() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.txt';
+  
+  input.addEventListener('change', function() {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const notesArea = document.getElementById('notesArea');
+        notesArea.value = e.target.result;
+        saveSetting('notes', e.target.result);
+      };
+      reader.readAsText(file);
+    }
+  });
+  
+  input.click();
+}
+
+
+/***************************************************
+                HOME PAGE WIDGETS
+***************************************************/
+
+// Mini Todo Display
+async function loadMiniTodos() {
+  if (!document.getElementById('miniTodoList')) return;
+  
+  const todos = await getAllTodosFromDB();
+  const miniList = document.getElementById('miniTodoList');
+  
+  if (todos.length === 0) {
+    miniList.innerHTML = '<li style="list-style:none; text-align:center; opacity:0.5;">No tasks yet</li>';
+    return;
+  }
+  
+  miniList.innerHTML = '';
+  todos.slice(0, 5).forEach(todo => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="checkbox"></div>
+      <span>${todo.text}</span>
+    `;
+    
+    li.addEventListener('click', async function() {
+      await deleteTodoFromDB(todo.id);
+      loadMiniTodos();
+    });
+    
+    miniList.appendChild(li);
+  });
+}
+
+
+// Initialize on home page
+if (document.getElementById('calendarGrid')) {
+  initDB().then(() => {
+    loadMiniTodos();
+    loadMiniCalendar();
+  });
+}
+// Mini Calendar
+async function loadMiniCalendar() {
+  if (!document.getElementById('calendarGrid')) return;
+  
+  const grid = document.getElementById('calendarGrid');
+  const monthTitle = document.getElementById('miniCalendarMonth');
+  const popup = document.getElementById('calendarPopup');
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  
+  monthTitle.textContent = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Get all todos for this month
+  const allTodos = await getAllTodosFromDB();
+  const todosWithDates = allTodos.filter(t => t.dueDate);
+  
+  grid.innerHTML = '';
+  
+  // Day headers
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'cal-day cal-header';
+    header.textContent = day;
+    grid.appendChild(header);
+  });
+  
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) {
+    grid.appendChild(document.createElement('div'));
+  }
+  
+  // Days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayEl = document.createElement('div');
+    dayEl.className = 'cal-day';
+    dayEl.textContent = day;
+    
+    const currentDate = new Date(year, month, day);
+    const dateStr = currentDate.toISOString().split('T')[0];
+    
+    // Check if this date has todos
+    const dayTodos = todosWithDates.filter(t => t.dueDate === dateStr);
+    
+    if (dayTodos.length > 0) {
+      dayEl.classList.add('has-todos');
+      dayEl.addEventListener('click', function() {
+        showTodosPopup(dateStr, dayTodos);
+      });
+    }
+    
+    if (day === today.getDate()) {
+      dayEl.classList.add('today');
+    }
+    
+    grid.appendChild(dayEl);
+  }
+  
+  // Close popup when clicking outside
+  document.addEventListener('click', function(e) {
+    if (popup && !popup.contains(e.target) && !e.target.classList.contains('has-todos')) {
+      popup.classList.remove('show');
+    }
+  });
+}
+
+function showTodosPopup(dateStr, todos) {
+  const popup = document.getElementById('calendarPopup');
+  const popupDate = document.getElementById('popupDate');
+  const popupTodos = document.getElementById('popupTodos');
+  
+  const date = new Date(dateStr);
+  popupDate.textContent = date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  popupTodos.innerHTML = '';
+  todos.forEach(todo => {
+    const li = document.createElement('li');
+    li.textContent = todo.text;
+    li.addEventListener('click', async function() {
+      await deleteTodoFromDB(todo.id);
+      popup.classList.remove('show');
+      loadMiniTodos();
+      loadMiniCalendar();
+    });
+    popupTodos.appendChild(li);
+  });
+  
+  popup.classList.add('show');
+}
 
 /* ================================
    MUSIC PLAYER
@@ -620,6 +823,8 @@ async function init() {
 
     if (isShuffle) generateShuffleQueue();
   }
+
+  
 }
 
 init();
@@ -789,85 +994,95 @@ function updatePlaylistOrder() {
 
 
 
-
-
 /***************************************************
                     Todo PAGE
  ***************************************************/
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   // Only run if we're on the todo page
   if (!document.getElementById('listItems')) return;
 
+  await initDB();
+
   const todoList = document.getElementById('listItems');
   const newTodoInput = document.getElementById('newItem');
+  const dueDateInput = document.getElementById('dueDate');
   const addBtn = document.getElementById('addItems');
 
-  // Load todos from localStorage
-  let todos = JSON.parse(localStorage.getItem('todos')) || [];
+  await renderTodos();
 
-  // Render initial todos
-  renderTodos();
-
-  // Add new todo
   addBtn.addEventListener('click', addTodo);
   newTodoInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') addTodo();
   });
 
-  function addTodo() {
+  async function addTodo() {
     const text = newTodoInput.value.trim();
     if (text) {
-      todos.push({ id: Date.now(), text, completed: false });
-      saveTodos();
-      renderTodos();
+      const dueDate = dueDateInput.value || null;
+      await saveTodoToDB(text, dueDate);
+      await renderTodos();
       newTodoInput.value = '';
+      dueDateInput.value = '';
       newTodoInput.focus();
     }
   }
 
-  function renderTodos() {
-    if (todos.length === 0) {
-      todoList.innerHTML = `
-                <div class="empty-state">
-                    <p>Add tasks to display them here</p>
-                </div>
-            `;
-      return;
-    }
-
-    todoList.innerHTML = '';
-    todos.forEach(todo => {
-      const todoItem = document.createElement('li');
-      todoItem.className = 'listItem';
-      todoItem.dataset.id = todo.id;
-
-      todoItem.innerHTML = `
-                <span class="todo-text">${todo.text}</span>
-                <input type="text" class="edit-input" value="${todo.text}">
-                <div class="actions">
-                    <button class="btn edit-btn">Edit</button>
-                    <button class="btn save-btn">Save</button>
-                    <button class="btn delete-btn">Delete</button>
-                </div>
-            `;
-
-      todoList.appendChild(todoItem);
-    });
-
-    // Add event listeners to buttons
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', toggleEdit);
-    });
-
-    document.querySelectorAll('.save-btn').forEach(btn => {
-      btn.addEventListener('click', saveEdit);
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', deleteTodo);
-    });
+async function renderTodos() {
+  const todos = await getAllTodosFromDB();
+  
+  if (todos.length === 0) {
+    todoList.innerHTML = `
+      <div class="empty-state">
+        <p>Add tasks to display them here</p>
+      </div>
+    `;
+    // Update calendars even when empty
+    if (window.loadMiniTodos) loadMiniTodos();
+    if (window.loadMiniCalendar) loadMiniCalendar();
+    return;
   }
+
+  todoList.innerHTML = '';
+  todos.forEach(todo => {
+    const todoItem = document.createElement('li');
+    todoItem.className = 'listItem';
+    todoItem.dataset.id = todo.id;
+
+    const dueDateDisplay = todo.dueDate 
+      ? `<span class="todo-due-date">  Due date:  ${new Date(todo.dueDate).toLocaleDateString()}</span>` 
+      : '';
+
+    todoItem.innerHTML = `
+      <span class="todo-text">${todo.text}${dueDateDisplay}</span>
+      <input type="text" class="edit-input" value="${todo.text}">
+      <div class="actions">
+        <button class="btn edit-btn">Edit</button>
+        <button class="btn save-btn">Save</button>
+        <button class="btn delete-btn">Delete</button>
+      </div>
+    `;
+
+    todoList.appendChild(todoItem);
+  });
+
+  // Add event listeners
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', toggleEdit);
+  });
+
+  document.querySelectorAll('.save-btn').forEach(btn => {
+    btn.addEventListener('click', saveEdit);
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', deleteTodo);
+  });
+  
+  // Update both calendars after rendering
+  if (window.loadMiniTodos) loadMiniTodos();
+  if (window.loadMiniCalendar) loadMiniCalendar();
+}
 
   function toggleEdit(e) {
     const todoItem = e.target.closest('.listItem');
@@ -876,7 +1091,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const editBtn = todoItem.querySelector('.edit-btn');
     const saveBtn = todoItem.querySelector('.save-btn');
 
-    // Toggle visibility
     todoText.classList.toggle('editing');
     editInput.classList.toggle('active');
     editBtn.classList.toggle('active');
@@ -888,41 +1102,94 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function saveEdit(e) {
+  async function saveEdit(e) {
     const todoItem = e.target.closest('.listItem');
     const editInput = todoItem.querySelector('.edit-input');
     const id = parseInt(todoItem.dataset.id);
 
     const newText = editInput.value.trim();
     if (newText) {
-      // Update todo in array
-      const todoIndex = todos.findIndex(todo => todo.id === id);
-      if (todoIndex !== -1) {
-        todos[todoIndex].text = newText;
-        saveTodos();
-      }
+      await updateTodoInDB(id, newText);
+      await renderTodos();
     }
-
-    // Toggle back to view mode
-    toggleEdit({ target: todoItem.querySelector('.edit-btn') });
   }
 
-  function deleteTodo(e) {
+  async function deleteTodo(e) {
     const todoItem = e.target.closest('.listItem');
     const id = parseInt(todoItem.dataset.id);
 
-    todos = todos.filter(todo => todo.id !== id);
-    saveTodos();
-    renderTodos();
-  }
-
-  function saveTodos() {
-    localStorage.setItem('todos', JSON.stringify(todos));
+    await deleteTodoFromDB(id);
+    await renderTodos();
+    
+    if (window.loadMiniTodos) loadMiniTodos();
+    if (window.loadMiniCalendar) loadMiniCalendar();
   }
 });
 
 
+// IndexedDB functions for todos
+function saveTodoToDB(text, dueDate = null) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['todos'], 'readwrite');
+    const store = transaction.objectStore('todos');
+    const request = store.add({ 
+      text, 
+      dueDate, 
+      completed: false, 
+      created: Date.now() 
+    });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
 
+function getTodosByDate(date) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['todos'], 'readonly');
+    const store = transaction.objectStore('todos');
+    const index = store.index('dueDate');
+    const request = index.getAll(date);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getAllTodosFromDB() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['todos'], 'readonly');
+    const store = transaction.objectStore('todos');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function updateTodoInDB(id, text) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['todos'], 'readwrite');
+    const store = transaction.objectStore('todos');
+    const getRequest = store.get(id);
+    
+    getRequest.onsuccess = () => {
+      const todo = getRequest.result;
+      todo.text = text;
+      const updateRequest = store.put(todo);
+      updateRequest.onsuccess = () => resolve();
+      updateRequest.onerror = () => reject(updateRequest.error);
+    };
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+function deleteTodoFromDB(id) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['todos'], 'readwrite');
+    const store = transaction.objectStore('todos');
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
 
 
 
@@ -936,192 +1203,235 @@ document.addEventListener('DOMContentLoaded', function() {
 /***************************************************
                     TIMETABLE PAGE
  ***************************************************/
-document.addEventListener('DOMContentLoaded', function() {
-  // Only run if we're on the timetable page
-  if (!document.getElementById('weekView')) return;
+document.addEventListener('DOMContentLoaded', async function() {
+  if (!document.getElementById('timetableSection')) return;
 
-  // Get DOM elements
-  const weekView = document.getElementById('weekView');
-  const monthView = document.getElementById('monthView');
-  const monthViewBtn = document.getElementById('monthView');
-  const weekViewBtn = document.getElementById('weekView');
-  const prevBtn = document.getElementById('prev');
-  const nextBtn = document.getElementById('next');
-  const weekviewTitle = document.getElementById('weekview');
+  await initDB();
 
-  // Current date and view tracking
   let currentDate = new Date();
-  let currentWeekStart = getWeekStart(currentDate);
   let isMonthView = false;
 
-  // Initialize the calendar
-  renderWeekView();
-  renderMonthView();
+  const weekViewBtn = document.getElementById('weekViewBtn');
+  const monthViewBtn = document.getElementById('monthViewBtn');
+  const prevBtn = document.getElementById('prevMonth');
+  const nextBtn = document.getElementById('nextMonth');
+  const titleEl = document.getElementById('calendarMonthYear');
+  const weekContainer = document.getElementById('weekViewContainer');
+  const monthContainer = document.getElementById('monthViewContainer');
 
+  // Initialize
+  await renderWeekView();
+  await renderMonthView();
 
-
+  // View toggle
   if (weekViewBtn) {
     weekViewBtn.addEventListener('click', function() {
       isMonthView = false;
       weekViewBtn.classList.add('active');
       monthViewBtn.classList.remove('active');
-      monthView.style.display = 'none';
-      weekView.style.display = 'grid';
-      updateDateRangeText();
+      weekContainer.style.display = 'block';
+      monthContainer.style.display = 'none';
+      renderWeekView();
     });
   }
 
-  if (prevBtn) {
-    prevBtn.addEventListener('click', function() {
-      if (isMonthView) {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderMonthView();
-      } else {
-        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-        renderWeekView();
-      }
-      updateDateRangeText();
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', function() {
-      if (isMonthView) {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderMonthView();
-      } else {
-        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-        renderWeekView();
-      }
-      updateDateRangeText();
-    });
-  }
-
-  // Helper functions
-  function getWeekStart(date) {
-    const day = date.getDay();
-    const diff = date.getDate() - day;
-    return new Date(date.setDate(diff));
-  }
-
-  function formatDate(date) {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }
-
-  function updateDateRangeText() {
-    if (!weekviewTitle) return;
-
-    if (isMonthView) {
-      weekviewTitle.textContent = currentDate.toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-      });
-    } else {
-      const weekEnd = new Date(currentWeekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      weekviewTitle.textContent = `${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
-    }
-  }
-
-  function renderWeekView() {
-    // Update day headers with dates
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-    for (let i = 0; i < 7; i++) {
-      const dayDate = new Date(currentWeekStart);
-      dayDate.setDate(dayDate.getDate() + i);
-
-      const dateElement = document.getElementById(`date${i + 1}`);
-      if (dateElement) {
-        dateElement.textContent = dayDate.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric'
-        });
-      }
-
-      // Highlight today
-      const today = new Date();
-      const dayColumn = document.querySelector(`#day${i + 1}`);
-      if (dayColumn && dayColumn.parentElement) {
-        if (dayDate.toDateString() === today.toDateString()) {
-          dayColumn.parentElement.classList.add('today');
-        } else {
-          dayColumn.parentElement.classList.remove('today');
-        }
-      }
-    }
-
-    updateDateRangeText();
-  }
-
-  // Event listeners - check if elements exist
   if (monthViewBtn) {
     monthViewBtn.addEventListener('click', function() {
       isMonthView = true;
       monthViewBtn.classList.add('active');
       weekViewBtn.classList.remove('active');
-      weekView.style.display = 'none';
-      monthView.style.display = 'grid';
-      updateDateRangeText();
+      weekContainer.style.display = 'none';
+      monthContainer.style.display = 'block';
+      renderMonthView();
     });
   }
 
-  function renderMonthView() {
-    // Clear existing content
-    monthView.innerHTML = '';
+  // Navigation
+  if (prevBtn) {
+    prevBtn.addEventListener('click', async function() {
+      if (isMonthView) {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        await renderMonthView();
+      } else {
+        currentDate.setDate(currentDate.getDate() - 7);
+        await renderWeekView();
+      }
+    });
+  }
 
-    // Add day headers
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    days.forEach(day => {
-      const dayHeader = document.createElement('div');
-      dayHeader.className = 'days';
-      dayHeader.textContent = day;
-      monthView.appendChild(dayHeader);
+  if (nextBtn) {
+    nextBtn.addEventListener('click', async function() {
+      if (isMonthView) {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        await renderMonthView();
+      } else {
+        currentDate.setDate(currentDate.getDate() + 7);
+        await renderWeekView();
+      }
+    });
+  }
+
+  // Week View
+  async function renderWeekView() {
+    const weekStart = getWeekStart(new Date(currentDate));
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    titleEl.textContent = `Week of ${weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+
+    const allTodos = await getAllTodosFromDB();
+    const weekTodos = allTodos.filter(t => {
+      if (!t.dueDate) return false;
+      const todoDate = new Date(t.dueDate);
+      return todoDate >= weekStart && todoDate <= weekEnd;
     });
 
-    // Get first day of month and number of days
+    // Clear existing todos and highlights
+    document.querySelectorAll('.week-todo-item').forEach(el => el.remove());
+    document.querySelectorAll('.today-col').forEach(el => el.classList.remove('today-col'));
+
+    // Highlight today's column
+    const today = new Date();
+    if (today >= weekStart && today <= weekEnd) {
+      const todayDayOfWeek = today.getDay();
+      const columnIndex = todayDayOfWeek === 0 ? 7 : todayDayOfWeek;
+      
+      const rows = document.querySelectorAll('#weekTableBody tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells[columnIndex]) {
+          cells[columnIndex].classList.add('today-col');
+        }
+      });
+    }
+
+    // Add todos to table
+    weekTodos.forEach(todo => {
+      const todoDate = new Date(todo.dueDate);
+      const dayOfWeek = todoDate.getDay();
+      
+      const firstRow = document.querySelectorAll('#weekTableBody tr')[0];
+      
+      if (firstRow) {
+        const cells = firstRow.querySelectorAll('td');
+        const columnIndex = dayOfWeek === 0 ? 7 : dayOfWeek;
+        const cell = cells[columnIndex];
+        
+        if (cell) {
+          const todoEl = document.createElement('div');
+          todoEl.className = 'week-todo-item';
+          todoEl.textContent = todo.text;
+          todoEl.addEventListener('click', async function() {
+            if (confirm(`Complete "${todo.text}"?`)) {
+              await deleteTodoFromDB(todo.id);
+              renderWeekView();
+              if (window.loadMiniCalendar) loadMiniCalendar();
+            }
+          });
+          cell.appendChild(todoEl);
+        }
+      }
+    });
+  }
+
+  // Month View
+  async function renderMonthView() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+    
+    titleEl.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
+    const startDay = firstDay.getDay();
 
-    // Add empty slots for days before the first day of the month
-    for (let i = 0; i < firstDay.getDay(); i++) {
+    const allTodos = await getAllTodosFromDB();
+    const monthTodos = allTodos.filter(t => {
+      if (!t.dueDate) return false;
+      const todoDate = new Date(t.dueDate);
+      return todoDate.getMonth() === month && todoDate.getFullYear() === year;
+    });
+
+    const grid = document.getElementById('monthCalendarGrid');
+    grid.innerHTML = '';
+
+    // Day headers
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+      const header = document.createElement('div');
+      header.className = 'month-cal-day-header';
+      header.textContent = day;
+      header.style.fontWeight = 'bold';
+      header.style.textAlign = 'center';
+      header.style.padding = '10px';
+      grid.appendChild(header);
+    });
+
+    // Empty cells before first day
+    for (let i = 0; i < startDay; i++) {
       const emptyDay = document.createElement('div');
-      emptyDay.className = 'month-day';
-      monthView.appendChild(emptyDay);
+      emptyDay.className = 'month-cal-day';
+      grid.appendChild(emptyDay);
     }
 
-    // Add days of the month
+    // Days of the month
     const today = new Date();
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayElement = document.createElement('div');
-      dayElement.className = 'month-day';
-
-      const dayHeader = document.createElement('div');
-      dayHeader.className = 'month-day-header';
+      const dayEl = document.createElement('div');
+      dayEl.className = 'month-cal-day';
 
       const dayNumber = document.createElement('div');
-      dayNumber.className = 'month-day-number';
+      dayNumber.className = 'month-cal-day-number';
       dayNumber.textContent = day;
+      dayEl.appendChild(dayNumber);
 
-      dayHeader.appendChild(dayNumber);
-      dayElement.appendChild(dayHeader);
+      const currentDate = new Date(year, month, day);
+      const dateStr = currentDate.toISOString().split('T')[0];
 
-      // Highlight today
+      // Check if today
       if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayElement.classList.add('today');
+        dayEl.classList.add('today');
       }
 
-      monthView.appendChild(dayElement);
+      // Get todos for this day
+      const dayTodos = monthTodos.filter(t => t.dueDate === dateStr);
+      
+      if (dayTodos.length > 0) {
+        dayEl.classList.add('has-todos-month');
+        const todosContainer = document.createElement('div');
+        todosContainer.className = 'month-cal-todos';
+        
+        dayTodos.forEach(todo => {
+          const todoItem = document.createElement('div');
+          todoItem.className = 'month-cal-todo-item';
+          todoItem.textContent = todo.text;
+          todoItem.title = todo.text;
+          todoItem.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            if (confirm(`Complete "${todo.text}"?`)) {
+              await deleteTodoFromDB(todo.id);
+              renderMonthView();
+              if (window.loadMiniCalendar) loadMiniCalendar();
+            }
+          });
+          todosContainer.appendChild(todoItem);
+        });
+        
+        dayEl.appendChild(todosContainer);
+      }
+
+      grid.appendChild(dayEl);
     }
   }
+
+  function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  }
 });
+
 
 /***************************************************
                     ABOUT PAGE
