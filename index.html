@@ -97,7 +97,34 @@
 
       </div>
 
+ <!-- Notes -->
+<div class="notesSection">
+  <h2>Notes</h2>
+  <div class="notesControls">
+    <img class="accent" src="img/themes/default/upload.svg" onclick="loadNotes()" alt="Load Notes" title="Load from file">
+    <img class="accent" src="img/themes/default/download.svg" onclick="saveNotes()" alt="Save Notes" title="Download as .txt">
+  </div>
+  <textarea id="notesArea" placeholder="Write your notes here..."></textarea>
+</div>
 
+
+
+     <!-- Mini Todo Display -->
+<div class="miniTodo">
+  <h2>Quick Tasks</h2>
+  <ul id="miniTodoList"></ul>
+  <a href="todo.html" class="view-all">View All →</a>
+</div>
+
+<!-- Mini Calendar -->
+<div class="miniCalendar">
+  <h2 id="miniCalendarMonth"></h2>
+  <div id="calendarGrid"></div>
+  <div class="calendar-popup" id="calendarPopup">
+    <h3 id="popupDate"></h3>
+    <ul id="popupTodos"></ul>
+  </div>
+</div>
 
     <!-- Music player -->
     <div class="Muse">
@@ -138,7 +165,7 @@
 
           <div id="museLibrary">
               <div id="museEditControls">
-                  <button onclick="selectAllSongs()"><img class="accent" src="img/themes/default/play.svg" alt="SelectAll"></button>
+                  <button onclick="selectAllSongs()"><img class="accent" src="img/themes/default/select.svg" alt="SelectAll"></button>
             
                   <button onclick="deleteSelected()"><img class="accent" src="img/themes/default/trash.svg" alt="DeleteSelection"></button>
 
@@ -147,6 +174,8 @@
               <ul id="musePlaylist"></ul>
             </div>
       </div>
+
+
 
   </section>
 
