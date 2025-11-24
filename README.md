@@ -7,6 +7,8 @@ Simple web app created to help students organize their school and personal life 
 - Connected navigation across pages
 - Persistent storage across pages
 - Dark and light mode with accent colors that can be adjusted
+- quick view of todo items and calender
+- simple note interface
 
  ##### Home page
 -  Welcome message introducing users to the website
@@ -16,9 +18,11 @@ Simple web app created to help students organize their school and personal life 
 
 ##### To do page
 - Functional to-do list with ability to add, remove and edit items
+- connection bettween todo item and time table
 
 ##### Timetable page
 - Shows timetable
+- show todo items if they were given a date
   
 ##### About page
 - Details about app and its version
