@@ -1,6 +1,13 @@
 # Studyapp
 Simple web app created to help students organize their school and personal life with the help of several tools. A music player, to-do list and scedule provide a basic framework for student productivity.
 
+## Screen Adaptability Support
+| Device    | Screen Width |
+| :------ | :-----: |
+| Desktop |  1000+  |
+| Tablets |   780   |
+| Phones  |   480   |
+
 ## Features
 ##### Universal
 - Mobile adaptability and PC friendliness
