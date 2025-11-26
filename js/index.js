@@ -2,33 +2,29 @@
                     System wide 
  ***************************************************/
 
-
-// --------- Dark mode settings
-
+// --------- Dark mode 
 function toggleDarkMode() {
-    document.body.classList.toggle('dark');
-    const icon = document.querySelector('#navbar-right-cosmetics img[onclick="toggleDarkMode()"]');
-    if (document.body.classList.contains('dark')) {
-        if (icon) {
-            icon.src = 'img/themes/default/darkmode.svg';
-        }
-        saveSetting('darkMode', true);
-    } else {
-        if (icon) {
-            icon.src = 'img/themes/default/lightmode.svg';
-        }
-        saveSetting('darkMode', false);
+  document.body.classList.toggle('dark');
+  const icon = document.querySelector('#navbar-right-cosmetics img[onclick="toggleDarkMode()"]');
+  if (document.body.classList.contains('dark')) {
+    if (icon) {
+      icon.src = 'img/themes/default/darkmode.svg';
     }
+    saveSetting('darkMode', true);
+  } else {
+    if (icon) {
+      icon.src = 'img/themes/default/lightmode.svg';
+    }
+    saveSetting('darkMode', false);
+  }
 }
-
 
 // ------------- Cosmetic menu toggle
 function showCosmetics() {
   document.getElementById('navbar-right-cosmetics').classList.toggle('show');
 }
 
-
-// ------------- Accent colors toggle
+// ------------- Accent colors 
 const accentColors = {
   black: { light: '#1a1a1a', neon: '#ffffff' },
   blue: { light: '#1e40af', neon: '#60a5fa' },
@@ -56,15 +52,16 @@ function setAccentColor(color) {
   document.querySelectorAll('.accent-option').forEach(opt => {
     opt.classList.toggle('active', opt.getAttribute('color') === color);
   });
-  
+
   // Save the accent color preference
   saveSetting('accentColor', color);
-  
+
   const picker = document.getElementById('accent-picker');
   if (picker) {
     picker.classList.remove('show');
   }
 }
+
 // Close picker on outside click
 document.addEventListener('click', (e) => {
   const picker = document.getElementById('accent-picker');
@@ -75,25 +72,44 @@ document.addEventListener('click', (e) => {
 });
 
 
+// ------------- Font cycling 
+document.getElementById('theme').addEventListener('click', function() {
+  const fonts = ['font-default', 'font-pixel', 'font-typewriter', 'font-handwrite'];
+  const headings = document.querySelectorAll('h1, h2, h3');
 
+  headings.forEach(heading => {
+    // Get current font 
+    let currentFont = 'font-default';
+    fonts.forEach(font => {
+      if (heading.classList.contains(font)) {
+        currentFont = font;
+      }
+    });
 
+    fonts.forEach(font => heading.classList.remove(font));
 
+    // Get next font in sequence
+    const currentIndex = fonts.indexOf(currentFont);
+    const nextIndex = (currentIndex + 1) % fonts.length;
+    const nextFont = fonts[nextIndex];
 
-
-
+    // Apply next font
+    heading.classList.add(nextFont);
+  });
+});
 
 /***************************************************
                 Navigation 
 ***************************************************/
 
-// Initialize navigation tooltips
+// Tooltips for the navbar
 function initNavTooltips() {
   const navItems = document.querySelectorAll('#navbar-links li');
-  
+
   navItems.forEach(item => {
     const link = item.querySelector('a');
     const tooltip = item.querySelector('.nav-tooltip');
-    
+
     if (link && tooltip) {
       // Show tooltip on hover
       link.addEventListener('mouseenter', function() {
@@ -102,14 +118,13 @@ function initNavTooltips() {
           tooltip.style.transform = 'translateY(0)';
         }
       });
-      
+
       // Hide tooltip when not hovering
       link.addEventListener('mouseleave', function() {
         tooltip.style.opacity = '0';
         tooltip.style.transform = 'translateY(10px)';
       });
-      
-      // Hide tooltip on touch devices after tap
+
       link.addEventListener('touchstart', function() {
         tooltip.style.opacity = '0';
         tooltip.style.transform = 'translateY(10px)';
@@ -118,26 +133,27 @@ function initNavTooltips() {
   });
 }
 
-// Initialize when page loads
+// Work on age loads
 document.addEventListener('DOMContentLoaded', function() {
   initNavTooltips();
 });
 
-// Re-initialize when window is resized (in case of orientation change)
+// check for window size change
 window.addEventListener('resize', initNavTooltips);
 
+/***************************************************
+                Database
+***************************************************/
 
-
-
-// ------------- [ Data base ] ----------------//
-
+// ------------- [ IndexedDB Database ] ----------------
 
 let db;
 const dbName = 'Study DataBase';
 
+// Local database that stores songs, settings, and todos itemsT
 function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, 3); // Increment to version 3
+    const request = indexedDB.open(dbName, 4);
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
@@ -145,6 +161,7 @@ function initDB() {
       resolve(db);
     };
 
+    // Request persistent storage 
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(granted => {
         if (granted) {
@@ -155,6 +172,7 @@ function initDB() {
       });
     }
 
+    // Create object storage
     request.onupgradeneeded = (e) => {
       db = e.target.result;
       if (!db.objectStoreNames.contains('songs')) {
@@ -172,6 +190,7 @@ function initDB() {
   });
 }
 
+// Song storage
 function saveSong(name, file) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['songs'], 'readwrite');
@@ -202,6 +221,7 @@ function getAllSongs() {
   });
 }
 
+// Settings 
 function saveSetting(key, value) {
   if (!db) return;
   const transaction = db.transaction(['settings'], 'readwrite');
@@ -223,35 +243,25 @@ function getSetting(key) {
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 /***************************************************
                    Home PAGE
  ***************************************************/
 
-// Notes functionality
+// ========== NOTES FUNCTIONALITY ==========
+
+// Notes 
 if (document.getElementById('notesArea')) {
   const notesArea = document.getElementById('notesArea');
-  
-  // Load notes from IndexedDB on page load
+
+  // Load notes from database
   initDB().then(async () => {
     const savedNotes = await getSetting('notes');
     if (savedNotes) {
       notesArea.value = savedNotes;
     }
   });
-  
-  // Auto-save notes every 2 seconds
+
+  // save notes automatically
   let notesTimeout;
   notesArea.addEventListener('input', function() {
     clearTimeout(notesTimeout);
@@ -261,11 +271,10 @@ if (document.getElementById('notesArea')) {
   });
 }
 
+// Export notes as txt
 function saveNotes() {
   const notesArea = document.getElementById('notesArea');
   const text = notesArea.value;
-  
-  // Create blob and download
   const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -277,11 +286,12 @@ function saveNotes() {
   URL.revokeObjectURL(url);
 }
 
+// Import txt files
 function loadNotes() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.txt';
-  
+
   input.addEventListener('change', function() {
     const file = input.files[0];
     if (file) {
@@ -294,27 +304,26 @@ function loadNotes() {
       reader.readAsText(file);
     }
   });
-  
+
   input.click();
 }
 
 
-/***************************************************
-                HOME PAGE WIDGETS
-***************************************************/
 
-// Mini Todo Display
+// ========== MINI TODO DISPLAY ==========
+
+// Mini todo list
 async function loadMiniTodos() {
   if (!document.getElementById('miniTodoList')) return;
-  
+
   const todos = await getAllTodosFromDB();
   const miniList = document.getElementById('miniTodoList');
-  
+
   if (todos.length === 0) {
     miniList.innerHTML = '<li style="list-style:none; text-align:center; opacity:0.5;">No tasks yet</li>';
     return;
   }
-  
+
   miniList.innerHTML = '';
   todos.slice(0, 5).forEach(todo => {
     const li = document.createElement('li');
@@ -322,46 +331,48 @@ async function loadMiniTodos() {
       <div class="checkbox"></div>
       <span>${todo.text}</span>
     `;
-    
+
     li.addEventListener('click', async function() {
       await deleteTodoFromDB(todo.id);
       loadMiniTodos();
     });
-    
+
     miniList.appendChild(li);
   });
 }
 
+// ========== MINI CALENDAR WIDGET ==========
 
-// Initialize on home page
+// show on home page
 if (document.getElementById('calendarGrid')) {
   initDB().then(() => {
     loadMiniTodos();
     loadMiniCalendar();
   });
 }
-// Mini Calendar
+
+// Load mini calendar
 async function loadMiniCalendar() {
   if (!document.getElementById('calendarGrid')) return;
-  
+
   const grid = document.getElementById('calendarGrid');
   const monthTitle = document.getElementById('miniCalendarMonth');
   const popup = document.getElementById('calendarPopup');
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
-  
+
   monthTitle.textContent = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  
+
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-  // Get all todos for this month
+
+  // Get all todos to show on calender
   const allTodos = await getAllTodosFromDB();
   const todosWithDates = allTodos.filter(t => t.dueDate);
-  
+
   grid.innerHTML = '';
-  
+
   // Day headers
   ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
     const header = document.createElement('div');
@@ -369,39 +380,38 @@ async function loadMiniCalendar() {
     header.textContent = day;
     grid.appendChild(header);
   });
-  
-  // Empty cells
+
+
   for (let i = 0; i < firstDay; i++) {
     grid.appendChild(document.createElement('div'));
   }
-  
-  // Days
+
   for (let day = 1; day <= daysInMonth; day++) {
     const dayEl = document.createElement('div');
     dayEl.className = 'cal-day';
     dayEl.textContent = day;
-    
+
     const currentDate = new Date(year, month, day);
     const dateStr = currentDate.toISOString().split('T')[0];
-    
-    // Check if this date has todos
+
+    // Check for todos
     const dayTodos = todosWithDates.filter(t => t.dueDate === dateStr);
-    
+
     if (dayTodos.length > 0) {
       dayEl.classList.add('has-todos');
       dayEl.addEventListener('click', function() {
         showTodosPopup(dateStr, dayTodos);
       });
     }
-    
+
     if (day === today.getDate()) {
       dayEl.classList.add('today');
     }
-    
+
     grid.appendChild(dayEl);
   }
-  
-  // Close popup when clicking outside
+
+  // Close when clicking outside
   document.addEventListener('click', function(e) {
     if (popup && !popup.contains(e.target) && !e.target.classList.contains('has-todos')) {
       popup.classList.remove('show');
@@ -409,18 +419,19 @@ async function loadMiniCalendar() {
   });
 }
 
+// Show todo details 
 function showTodosPopup(dateStr, todos) {
   const popup = document.getElementById('calendarPopup');
   const popupDate = document.getElementById('popupDate');
   const popupTodos = document.getElementById('popupTodos');
-  
+
   const date = new Date(dateStr);
-  popupDate.textContent = date.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric' 
+  popupDate.textContent = date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
   });
-  
+
   popupTodos.innerHTML = '';
   todos.forEach(todo => {
     const li = document.createElement('li');
@@ -433,26 +444,28 @@ function showTodosPopup(dateStr, todos) {
     });
     popupTodos.appendChild(li);
   });
-  
+
   popup.classList.add('show');
 }
 
+
 /* ================================
-   MUSIC PLAYER
+             MUSIC PLAYER 
    ================================ */
 
+// Music player global variables
 let isPlaying = false;
 let isShuffle = false;
-let repeatMode = 0;
+let repeatMode = 0; // 0: off, 1: all, 2: one
 let currentMusicIndex = 0;
 let audio = new Audio();
 let playlist = [];
 let shuffleQueue = [];
 let shufflePosition = 0;
 
-// Check if music player elements exist on this page
+//  Show music player 
 if (document.getElementById('repeat')) {
-  // Repeat button
+  // Repeat button - cycles through repeat modes
   document.getElementById('repeat').addEventListener('click', function() {
     const btn = this.querySelector('img');
     repeatMode = (repeatMode + 1) % 3;
@@ -470,7 +483,8 @@ if (document.getElementById('repeat')) {
 }
 
 if (document.getElementById('shuffle')) {
-  // Shuffle button
+
+  // start shuffle 
   document.getElementById('shuffle').addEventListener('click', function() {
     const btn = this.querySelector('img');
     isShuffle = !isShuffle;
@@ -491,7 +505,8 @@ if (document.getElementById('shuffle')) {
 }
 
 if (document.getElementById('play/pause')) {
-  // Play/Pause button
+
+  // Play & Pause button 
   document.getElementById('play/pause').addEventListener('click', function() {
     if (playlist.length === 0) return;
 
@@ -514,7 +529,8 @@ if (document.getElementById('play/pause')) {
 }
 
 if (document.getElementById('previous')) {
-  // Previous button
+
+  // go to previous track 
   document.getElementById('previous').addEventListener('click', function() {
     if (playlist.length === 0) return;
 
@@ -528,7 +544,8 @@ if (document.getElementById('previous')) {
         shufflePosition--;
         currentMusicIndex = shuffleQueue[shufflePosition];
       } else {
-        // Loop back to end
+
+        // loop
         shufflePosition = shuffleQueue.length - 1;
         currentMusicIndex = shuffleQueue[shufflePosition];
       }
@@ -541,28 +558,31 @@ if (document.getElementById('previous')) {
 }
 
 if (document.getElementById('next')) {
-  // Next button
+
+
+  // Go to next track
   document.getElementById('next').addEventListener('click', function() {
     if (playlist.length === 0) return;
     playNext();
   });
 }
 
+// ========== MUSIC PLAYER EVENT HANDLERS ==========
 
-// Update progress bar
+// Progress bar
 audio.addEventListener('timeupdate', function() {
   if (document.getElementById('museProgressBar')) {
     const progress = (audio.currentTime / audio.duration) * 100;
     document.getElementById('museProgressBar').style.width = progress + '%';
 
-    // Update time display
+    // Update time 
     const current = formatTime(audio.currentTime);
     const duration = formatTime(audio.duration);
     document.getElementById('museTime').textContent = `${current} / ${duration}`;
   }
 });
 
-// Click to seek
+// Click to seek progress bar
 if (document.getElementById('museProgress')) {
   document.getElementById('museProgress').addEventListener('click', function(e) {
     const rect = this.getBoundingClientRect();
@@ -571,6 +591,7 @@ if (document.getElementById('museProgress')) {
   });
 }
 
+// Format time 
 function formatTime(seconds) {
   if (isNaN(seconds)) return '0:00';
   const mins = Math.floor(seconds / 60);
@@ -578,7 +599,7 @@ function formatTime(seconds) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// When song ends
+// Repeat mode
 audio.addEventListener('ended', function() {
   if (repeatMode === 2) {
     audio.currentTime = 0;
@@ -588,6 +609,9 @@ audio.addEventListener('ended', function() {
   }
 });
 
+// ========== MUSIC PLAYER CORE FUNCTIONS ==========
+
+// Play next song 
 function playNext() {
   if (playlist.length === 0) return;
 
@@ -615,6 +639,7 @@ function playNext() {
   }
 }
 
+// Load and play songs
 function loadAndPlay(index) {
   if (playlist.length === 0) return;
 
@@ -634,6 +659,7 @@ function loadAndPlay(index) {
   saveSetting('currentIndex', currentMusicIndex);
 }
 
+// Stop audio
 function stopPlayback() {
   const disc = document.querySelector('#musePlayer img');
   const btn = document.querySelector('#play\\/pause img');
@@ -644,6 +670,7 @@ function stopPlayback() {
   btn.src = 'img/themes/default/play.svg';
 }
 
+// randomise shuffle
 function generateShuffleQueue() {
   shuffleQueue = [...Array(playlist.length).keys()];
   for (let i = shuffleQueue.length - 1; i > 0; i--) {
@@ -653,6 +680,7 @@ function generateShuffleQueue() {
   shufflePosition = 0;
 }
 
+// Highlight playing song 
 function highlightCurrentSong() {
   const items = document.querySelectorAll('#musePlaylist li');
   items.forEach((item, i) => {
@@ -663,9 +691,9 @@ function highlightCurrentSong() {
   });
 }
 
+// ========== PLAYLIST MANAGEMENT ==========
 
-// play list add and delete
-
+// Upload to playlist
 if (document.getElementById('upload')) {
   document.getElementById('upload').addEventListener('click', function() {
     const input = document.createElement('input');
@@ -703,12 +731,14 @@ if (document.getElementById('upload')) {
   });
 }
 
+// Update playlist after reorder
 function updateIndices() {
   document.querySelectorAll('#musePlaylist li').forEach((item, i) => {
     item.dataset.index = i;
   });
 }
 
+// Check if playlist is empty 
 function checkPlaylistEmpty() {
   if (playlist.length === 0) {
     document.getElementById('museLibrary').classList.remove('show');
@@ -718,6 +748,8 @@ function checkPlaylistEmpty() {
     shufflePosition = 0;
   }
 }
+
+// Create playlist item 
 function createPlaylistItem(name, index, id) {
   const li = document.createElement('li');
   li.innerHTML = `
@@ -735,14 +767,10 @@ function createPlaylistItem(name, index, id) {
       this.classList.toggle('selected');
       return;
     }
-
-    // Single click selects the song
     document.querySelectorAll('#musePlaylist li').forEach(item => {
       item.classList.remove('delete-ready', 'playing');
     });
     this.classList.add('playing');
-    
-    // Update current music index when clicked
     currentMusicIndex = parseInt(this.dataset.index);
     highlightCurrentSong();
   });
@@ -750,11 +778,9 @@ function createPlaylistItem(name, index, id) {
   li.addEventListener('dblclick', function(e) {
     if (e.target.classList.contains('drag-handle')) return;
     if (editMode) return;
-    
+
     // Double click plays the song
     loadAndPlay(parseInt(this.dataset.index));
-    
-    // Remove any delete-ready states
     document.querySelectorAll('#musePlaylist li').forEach(item => {
       item.classList.remove('delete-ready');
     });
@@ -764,14 +790,14 @@ function createPlaylistItem(name, index, id) {
   document.getElementById('musePlaylist').appendChild(li);
 }
 
+// ========== LOAD PREFERENCES ==========
 
-//--------------load data
+//Load Save data
 async function init() {
   await initDB();
-  // Load saved accent color
   const savedAccent = await getSetting('accentColor') || 'black';
   setAccentColor(savedAccent);
-  
+
   const darkMode = await getSetting('darkMode');
   if (darkMode) {
     document.body.classList.add('dark');
@@ -781,9 +807,7 @@ async function init() {
     }
   }
 
-  
-
-  // Only initialize music player if on home page
+  // start music player on home page
   if (document.getElementById('musePlayer')) {
     isShuffle = await getSetting('shuffle') || false;
     if (isShuffle) {
@@ -803,6 +827,7 @@ async function init() {
       }
     }
 
+    // Load songs from database
     const songs = await getAllSongs();
     songs.forEach((song, index) => {
       playlist.push({ id: song.id, name: song.name, file: song.file });
@@ -823,19 +848,16 @@ async function init() {
 
     if (isShuffle) generateShuffleQueue();
   }
-
-  
 }
 
 init();
 
-
-//----------------------TOOLBAR CONTROLS
-
+// ========== MUSIC PLAYER TOOLBAR ==========
 
 let editMode = false;
 let libraryVisible = false;
 
+// Toggle playlist 
 function toggleLibrary() {
   libraryVisible = !libraryVisible;
   if (libraryVisible && playlist.length > 0) {
@@ -847,6 +869,7 @@ function toggleLibrary() {
   }
 }
 
+// Toggle edit 
 function toggleEditMode() {
   editMode = !editMode;
   const editControls = document.getElementById('museEditControls');
@@ -864,17 +887,17 @@ function toggleEditMode() {
   }
 }
 
+// Select all 
 function selectAllSongs() {
   document.querySelectorAll('#musePlaylist li').forEach(item => {
     item.classList.add('selected');
   });
 }
 
+// Delete selected 
 async function deleteSelected() {
   const selected = document.querySelectorAll('#musePlaylist li.selected');
   if (selected.length === 0) return;
-
-  // Get all IDs first before modifying
   const toDelete = [];
   selected.forEach(li => {
     toDelete.push({
@@ -883,7 +906,7 @@ async function deleteSelected() {
     });
   });
 
-  // Delete from database and remove elements
+  // Delete from database
   for (const item of toDelete) {
     await deleteSong(item.id);
     const song = playlist.find(s => s.id === item.id);
@@ -911,6 +934,7 @@ async function deleteSelected() {
   if (isShuffle && playlist.length > 0) generateShuffleQueue();
 }
 
+// Clear playlist
 async function clearPlaylist() {
   if (!confirm('Clear entire playlist?')) return;
 
@@ -928,11 +952,11 @@ async function clearPlaylist() {
   toggleEditMode();
 }
 
-
-// Drag to reorder
+// ========== DRAG AND DROP REORDERING ==========
 
 let draggedItem = null;
 
+//Drag and drop functions
 function setupDragAndDrop(li) {
   li.draggable = true;
 
@@ -984,22 +1008,12 @@ function updatePlaylistOrder() {
   if (isShuffle) generateShuffleQueue();
 }
 
-
-
-
-
-
-
-
-
-
-
 /***************************************************
                     Todo PAGE
  ***************************************************/
 
+
 document.addEventListener('DOMContentLoaded', async function() {
-  // Only run if we're on the todo page
   if (!document.getElementById('listItems')) return;
 
   await initDB();
@@ -1016,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (e.key === 'Enter') addTodo();
   });
 
+  // Add new todo 
   async function addTodo() {
     const text = newTodoInput.value.trim();
     if (text) {
@@ -1028,62 +1043,64 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-async function renderTodos() {
-  const todos = await getAllTodosFromDB();
-  
-  if (todos.length === 0) {
-    todoList.innerHTML = `
-      <div class="empty-state">
-        <p>Add tasks to display them here</p>
-      </div>
-    `;
-    // Update calendars even when empty
+
+  // Get todos form database
+  async function renderTodos() {
+    const todos = await getAllTodosFromDB();
+
+    if (todos.length === 0) {
+      todoList.innerHTML = `
+        <div class="empty-state">
+          <p>Add tasks to display them here</p>
+        </div>
+      `;
+      // Update calendars even when empty
+      if (window.loadMiniTodos) loadMiniTodos();
+      if (window.loadMiniCalendar) loadMiniCalendar();
+      return;
+    }
+
+    todoList.innerHTML = '';
+    todos.forEach(todo => {
+      const todoItem = document.createElement('li');
+      todoItem.className = 'listItem';
+      todoItem.dataset.id = todo.id;
+
+      const dueDateDisplay = todo.dueDate
+        ? `<span class="todo-due-date">  Due date:  ${new Date(todo.dueDate).toLocaleDateString()}</span>`
+        : '';
+
+      todoItem.innerHTML = `
+        <span class="todo-text">${todo.text}${dueDateDisplay}</span>
+        <input type="text" class="edit-input" value="${todo.text}">
+        <div class="actions">
+          <button class="btn edit-btn">Edit</button>
+          <button class="btn save-btn">Save</button>
+          <button class="btn delete-btn">Delete</button>
+        </div>
+      `;
+
+      todoList.appendChild(todoItem);
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', toggleEdit);
+    });
+
+    document.querySelectorAll('.save-btn').forEach(btn => {
+      btn.addEventListener('click', saveEdit);
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', deleteTodo);
+    });
+
+    // Update calendar
     if (window.loadMiniTodos) loadMiniTodos();
     if (window.loadMiniCalendar) loadMiniCalendar();
-    return;
   }
 
-  todoList.innerHTML = '';
-  todos.forEach(todo => {
-    const todoItem = document.createElement('li');
-    todoItem.className = 'listItem';
-    todoItem.dataset.id = todo.id;
-
-    const dueDateDisplay = todo.dueDate 
-      ? `<span class="todo-due-date">  Due date:  ${new Date(todo.dueDate).toLocaleDateString()}</span>` 
-      : '';
-
-    todoItem.innerHTML = `
-      <span class="todo-text">${todo.text}${dueDateDisplay}</span>
-      <input type="text" class="edit-input" value="${todo.text}">
-      <div class="actions">
-        <button class="btn edit-btn">Edit</button>
-        <button class="btn save-btn">Save</button>
-        <button class="btn delete-btn">Delete</button>
-      </div>
-    `;
-
-    todoList.appendChild(todoItem);
-  });
-
-  // Add event listeners
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', toggleEdit);
-  });
-
-  document.querySelectorAll('.save-btn').forEach(btn => {
-    btn.addEventListener('click', saveEdit);
-  });
-
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', deleteTodo);
-  });
-  
-  // Update both calendars after rendering
-  if (window.loadMiniTodos) loadMiniTodos();
-  if (window.loadMiniCalendar) loadMiniCalendar();
-}
-
+  // Toggle edit 
   function toggleEdit(e) {
     const todoItem = e.target.closest('.listItem');
     const todoText = todoItem.querySelector('.todo-text');
@@ -1102,6 +1119,7 @@ async function renderTodos() {
     }
   }
 
+  // Save edits
   async function saveEdit(e) {
     const todoItem = e.target.closest('.listItem');
     const editInput = todoItem.querySelector('.edit-input');
@@ -1114,29 +1132,28 @@ async function renderTodos() {
     }
   }
 
+  // Delete item from todo
   async function deleteTodo(e) {
     const todoItem = e.target.closest('.listItem');
     const id = parseInt(todoItem.dataset.id);
 
     await deleteTodoFromDB(id);
     await renderTodos();
-    
+
     if (window.loadMiniTodos) loadMiniTodos();
     if (window.loadMiniCalendar) loadMiniCalendar();
   }
 });
 
-
-// IndexedDB functions for todos
 function saveTodoToDB(text, dueDate = null) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['todos'], 'readwrite');
     const store = transaction.objectStore('todos');
-    const request = store.add({ 
-      text, 
-      dueDate, 
-      completed: false, 
-      created: Date.now() 
+    const request = store.add({
+      text,
+      dueDate,
+      completed: false,
+      created: Date.now()
     });
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
@@ -1154,6 +1171,7 @@ function getTodosByDate(date) {
   });
 }
 
+// Get todo from database
 function getAllTodosFromDB() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['todos'], 'readonly');
@@ -1164,12 +1182,13 @@ function getAllTodosFromDB() {
   });
 }
 
+// Update todo
 function updateTodoInDB(id, text) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['todos'], 'readwrite');
     const store = transaction.objectStore('todos');
     const getRequest = store.get(id);
-    
+
     getRequest.onsuccess = () => {
       const todo = getRequest.result;
       todo.text = text;
@@ -1181,6 +1200,7 @@ function updateTodoInDB(id, text) {
   });
 }
 
+// Delete todo from database
 function deleteTodoFromDB(id) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(['todos'], 'readwrite');
@@ -1191,18 +1211,11 @@ function deleteTodoFromDB(id) {
   });
 }
 
-
-
-
-
-
-
-
-
-
 /***************************************************
                     TIMETABLE PAGE
  ***************************************************/
+
+
 document.addEventListener('DOMContentLoaded', async function() {
   if (!document.getElementById('timetableSection')) return;
 
@@ -1219,11 +1232,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   const weekContainer = document.getElementById('weekViewContainer');
   const monthContainer = document.getElementById('monthViewContainer');
 
-  // Initialize
   await renderWeekView();
   await renderMonthView();
 
-  // View toggle
+  // View toggles
   if (weekViewBtn) {
     weekViewBtn.addEventListener('click', function() {
       isMonthView = false;
@@ -1246,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Navigation
+  // Calender navigation
   if (prevBtn) {
     prevBtn.addEventListener('click', async function() {
       if (isMonthView) {
@@ -1271,7 +1283,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Week View
   async function renderWeekView() {
     const weekStart = getWeekStart(new Date(currentDate));
     const weekEnd = new Date(weekStart);
@@ -1286,16 +1297,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       return todoDate >= weekStart && todoDate <= weekEnd;
     });
 
-    // Clear existing todos and highlights
+    // Clear todos from calender
     document.querySelectorAll('.week-todo-item').forEach(el => el.remove());
     document.querySelectorAll('.today-col').forEach(el => el.classList.remove('today-col'));
 
-    // Highlight today's column
+    // Highlight today
     const today = new Date();
     if (today >= weekStart && today <= weekEnd) {
       const todayDayOfWeek = today.getDay();
       const columnIndex = todayDayOfWeek === 0 ? 7 : todayDayOfWeek;
-      
+
       const rows = document.querySelectorAll('#weekTableBody tr');
       rows.forEach(row => {
         const cells = row.querySelectorAll('td');
@@ -1309,14 +1320,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     weekTodos.forEach(todo => {
       const todoDate = new Date(todo.dueDate);
       const dayOfWeek = todoDate.getDay();
-      
+
       const firstRow = document.querySelectorAll('#weekTableBody tr')[0];
-      
+
       if (firstRow) {
         const cells = firstRow.querySelectorAll('td');
         const columnIndex = dayOfWeek === 0 ? 7 : dayOfWeek;
         const cell = cells[columnIndex];
-        
+
         if (cell) {
           const todoEl = document.createElement('div');
           todoEl.className = 'week-todo-item';
@@ -1334,11 +1345,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Month View
+  // Month view
   async function renderMonthView() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     titleEl.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     const firstDay = new Date(year, month, 1);
@@ -1367,7 +1378,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       grid.appendChild(header);
     });
 
-    // Empty cells before first day
     for (let i = 0; i < startDay; i++) {
       const emptyDay = document.createElement('div');
       emptyDay.className = 'month-cal-day';
@@ -1393,14 +1403,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         dayEl.classList.add('today');
       }
 
-      // Get todos for this day
+      // Get todos for today
       const dayTodos = monthTodos.filter(t => t.dueDate === dateStr);
-      
+
       if (dayTodos.length > 0) {
         dayEl.classList.add('has-todos-month');
         const todosContainer = document.createElement('div');
         todosContainer.className = 'month-cal-todos';
-        
+
         dayTodos.forEach(todo => {
           const todoItem = document.createElement('div');
           todoItem.className = 'month-cal-todo-item';
@@ -1416,7 +1426,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           });
           todosContainer.appendChild(todoItem);
         });
-        
+
         dayEl.appendChild(todosContainer);
       }
 
@@ -1432,18 +1442,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
-
 /***************************************************
                     ABOUT PAGE
  ***************************************************/
 
 
-// -------- Text type effect and content ----------
 document.addEventListener('DOMContentLoaded', () => {
-  // Only run if we're on the about page
   if (!document.getElementById('aboutName')) return;
 
-  // assign names, details, profile icons and fonts to different creators
+  // Creator info
   const users = [
     {
       name: " Arthur",
@@ -1475,8 +1482,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let typewriterInterval = null;
   let titleInterval = null;
 
-
-  // ------ Get fonts and html elements
+  // Set fonts 
   const nameEl = document.getElementById('aboutName');
   const infoEl = document.getElementById('aboutInfo');
   const imageEl = document.getElementById('userImage');
@@ -1487,8 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fonts = ['default', 'pixel', 'typewriter', 'handwrite'];
   let fontIndex = 0;
 
-
-  // ------- function that handles typewriter effect for names
+  // Typewriter effect for names
   function typeText(text, element, speed = 80) {
     if (typewriterInterval) clearInterval(typewriterInterval);
     element.textContent = '';
@@ -1503,9 +1508,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, speed);
   }
 
-
-
-  // -------- function that handles specifically the title's typewriter effect and its font rotation  
+  // Tititle typewriter effect
 
   // handles type effect
   function typeTitle(text, element, speed = 100) {
@@ -1519,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         clearInterval(titleInterval);
 
-        // handles font rotation
+        // Rotate fonts for title
         setInterval(() => {
           element.style.opacity = '0';
           setTimeout(() => {
@@ -1532,7 +1535,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, speed);
   }
 
-  // Tracks active creator
   function displayUser(index) {
     const user = users[index];
     imageEl.src = user.image;
@@ -1541,7 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
     nameEl.style.fontFamily = user.font;
   }
 
-  // buttons to go to the next and previous creator
+  // Next and previous creator
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
       currentAboutIndex = (currentAboutIndex - 1 + users.length) % users.length;
@@ -1556,11 +1558,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // displays title text and active creator
   if (titleEl) {
     typeTitle("Our Team", titleEl);
   }
   displayUser(currentAboutIndex);
 });
-
-
